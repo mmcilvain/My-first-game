@@ -9,6 +9,7 @@ export class EnemySystem {
     this.callbacks = callbacks;
     this.time = 0;
     this.active = false;
+    this.playerEye = new THREE.Vector3();
     this.enemies = world.targets.map((group, index) => {
       const targetData = group.userData.targetData;
       targetData.kind = 'enemy';
@@ -22,6 +23,9 @@ export class EnemySystem {
         alerted: false,
         dead: false,
         reactionTimer: 0,
+        origin: new THREE.Vector3(),
+        toPlayer: new THREE.Vector3(),
+        direction: new THREE.Vector3(),
       };
       group.userData.enemyState = state;
       return state;
@@ -72,7 +76,7 @@ export class EnemySystem {
 
   update(delta, player) {
     this.time += delta;
-    const playerEye = player.getEyePosition(new THREE.Vector3());
+    const playerEye = player.getEyePosition(this.playerEye);
 
     for (const enemy of this.enemies) {
       const { group, targetData } = enemy;
@@ -83,13 +87,14 @@ export class EnemySystem {
       if (enemy.reactionTimer > 0) enemy.reactionTimer -= delta;
       if (!this.active) continue;
 
-      const origin = group.position.clone();
+      const { origin, toPlayer, direction } = enemy;
+      origin.copy(group.position);
       origin.y += 1.7;
-      const toPlayer = playerEye.clone().sub(origin);
+      toPlayer.copy(playerEye).sub(origin);
       const distance = toPlayer.length();
       if (distance > 30) continue;
 
-      const direction = toPlayer.normalize();
+      direction.copy(toPlayer).normalize();
       if (!this.canSee(origin, direction, distance)) continue;
 
       enemy.alerted = true;
