@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="theme-color" content="#080b0c" />
+    <meta name="description" content="Blackout Protocol — a procedural near-future first-person shooter for the web." />
+    <title>Blackout Protocol</title>
+  </head>
+  <body>
+    <main id="app" aria-label="Blackout Protocol game">
+      <canvas id="gameCanvas" aria-label="3D game view"></canvas>
+
+      <section id="loadingScreen" class="screen-panel loading-screen">
+        <div class="loading-mark"><span class="mark-dot"></span><span>BP//01</span></div>
+        <div class="loading-copy">
+          <p class="eyebrow">PROCEDURAL COMBAT SIMULATION</p>
+          <h1>BLACKOUT<br /><em>PROTOCOL</em></h1>
+          <p id="loadingStage">Initializing renderer</p>
+        </div>
+        <div class="loading-meter"><span id="loadingBar"></span></div>
+      </section>
+
+      <section id="startScreen" class="screen-panel start-screen hidden" aria-label="Start game">
+        <div class="scan-lines"></div>
+        <header class="start-header">
+          <div class="brand-block"><span class="brand-kicker">FIELD SYSTEM // 04</span><strong>BLACKOUT<br /><i>PROTOCOL</i></strong></div>
+          <div class="build-label">LIVE BUILD<br /><b>0.9.7 / WEB</b></div>
+        </header>
+        <div class="start-content">
+          <div>
+            <p class="eyebrow accent">OPERATION NIGHTFALL</p>
+            <h1>TAKE THE<br /><span>GRID BACK.</span></h1>
+            <p class="start-description">A short-range combat sandbox built for the browser. Push through the relay yard, test the line, and stay moving.</p>
+            <button id="playButton" class="primary-button" type="button"><span>▶</span> TAP TO PLAY</button>
+            <p class="start-hint">CLICK TO LOCK MOUSE <span>•</span> TOUCH CONTROLS READY</p>
+          </div>
+          <aside class="briefing-card">
+            <div class="card-label">FIELD BRIEF // 001</div>
+            <div class="briefing-row"><span>ZONE</span><strong>RELAY YARD 7</strong></div>
+            <div class="briefing-row"><span>THREAT</span><strong class="status-live">LIVE FIRE</strong></div>
+            <div class="briefing-row"><span>WEATHER</span><strong>ASH / LOW VIS</strong></div>
+            <div class="briefing-row"><span>LOADOUT</span><strong>VANTA-9 / 5.56</strong></div>
+            <div class="briefing-rule"></div>
+            <p>Keep the upper line clear. Targets reset when the field goes quiet.</p>
+          </aside>
+        </div>
+        <footer class="start-footer"><span>© 2026 BLACKOUT SYSTEMS</span><span>NO NETWORK REQUIRED</span><span>ALL ASSETS GENERATED IN RUNTIME</span></footer>
+      </section>
+
+      <section id="hud" class="hud hidden" aria-live="polite">
+        <div class="hud-top hud-panel">
+          <div class="mission-readout"><span class="hud-label">OPERATION</span><strong>NIGHTFALL</strong><span class="hud-sub">RELAY YARD 7 / SECTOR C</span></div>
+          <div class="compass"><span id="compassDirection">N</span><div class="compass-line"><i></i><i></i><i></i><i></i><i></i></div><span id="compassDegrees">000°</span></div>
+          <div class="objective-readout"><span class="hud-label">FIELD STATUS</span><strong id="targetStatus">TARGETS ACTIVE</strong><span class="status-dot"></span><div class="score-line"><span>SCORE <b id="scoreValue">00000</b></span><span>ROUND <b id="roundValue">01</b></span><span>COMBO <b id="comboValue">—</b></span></div></div>
+        </div>
+        <div id="crosshair" class="crosshair" aria-hidden="true"><i></i><i></i><i></i><i></i><b></b><span id="hitMarker" class="hit-marker">×</span></div>
+        <div id="interactionPrompt" class="interaction-prompt hidden">PRESS <b>E</b> TO INTERACT</div>
+        <div id="centerToast" class="center-toast" role="status"></div>
+        <div class="hud-bottom hud-panel">
+          <div class="health-block"><div class="health-icon">+</div><div><span class="hud-label">VITALS</span><strong><span id="healthValue">100</span><small> / 100</small></strong><div class="health-bar"><i id="healthBar"></i></div></div></div>
+          <div class="stance-readout"><span class="stance-dot"></span><span id="stanceText">STANDING</span></div>
+          <div class="ammo-block"><div class="weapon-label"><span>VANTA-9</span><small>CARBINE / AUTOMATIC</small></div><strong><span id="ammoValue">30</span><small> / <span id="reserveValue">120</span></small></strong><div id="reloadText" class="reload-text hidden">RELOADING <i></i></div></div>
+        </div>
+        <div id="fpsCounter" class="fps-counter hidden">60 FPS</div>
+      </section>
+
+      <section id="mobileControls" class="mobile-controls hidden" aria-label="Touch controls">
+        <div id="joystick" class="joystick touch-control"><div class="joystick-ring"></div><div id="joystickKnob" class="joystick-knob"></div></div>
+        <div id="lookRegion" class="look-region touch-control" aria-label="Drag to look"></div>
+        <div class="mobile-actions">
+          <button id="mobileAim" class="control-button aim-button" type="button" aria-label="Aim down sights">◎<span>AIM</span></button>
+          <button id="mobileFire" class="control-button fire-button" type="button" aria-label="Fire">●</button>
+          <button id="mobileReload" class="control-button" type="button" aria-label="Reload">↻<span>RLD</span></button>
+          <button id="mobileJump" class="control-button" type="button" aria-label="Jump">↑<span>JMP</span></button>
+          <button id="mobileCrouch" class="control-button" type="button" aria-label="Crouch">⌄<span>CRO</span></button>
+          <button id="mobileSprint" class="control-button" type="button" aria-label="Sprint">»<span>RUN</span></button>
+        </div>
+      </section>
+
+      <section id="pauseMenu" class="modal hidden" aria-label="Pause menu">
+        <div class="modal-card">
+          <div class="modal-heading"><div><span class="eyebrow accent">FIELD SYSTEM</span><h2>PAUSED</h2></div><span class="modal-code">BP//MENU</span></div>
+          <div class="menu-tabs"><button class="menu-tab active" data-tab="settings" type="button">SETTINGS</button><button class="menu-tab" data-tab="brief" type="button">BRIEFING</button></div>
+          <div id="settingsPanel" class="settings-panel">
+            <div class="settings-section"><span class="settings-title">GRAPHICS PRESET</span><div class="preset-buttons"><button data-preset="low" type="button">LOW</button><button data-preset="medium" type="button">MEDIUM</button><button data-preset="high" type="button">HIGH</button></div></div>
+            <div class="settings-grid">
+              <label>Resolution scale <output id="resolutionOutput">90%</output><input id="resolutionScale" type="range" min="55" max="100" step="5" value="90" /></label>
+              <label>Shadow quality <select id="shadowQuality"><option value="0">Off</option><option value="1" selected>Soft</option><option value="2">Detailed</option></select></label>
+              <label>Particle density <output id="particleOutput">70%</output><input id="particleDensity" type="range" min="25" max="100" step="5" value="70" /></label>
+              <label>Dynamic lights <output id="lightsOutput">4</output><input id="dynamicLights" type="range" min="0" max="6" step="1" value="4" /></label>
+              <label>Look sensitivity <output id="sensitivityOutput">1.0×</output><input id="sensitivity" type="range" min="0.4" max="2" step="0.1" value="1" /></label>
+              <label>Audio volume <output id="volumeOutput">70%</output><input id="volume" type="range" min="0" max="100" step="5" value="70" /></label>
+            </div>
+            <div class="toggle-row"><label><input id="bloomToggle" type="checkbox" checked /> <span>Subtle bloom</span></label><label><input id="aoToggle" type="checkbox" checked /> <span>Contact shading</span></label><label><input id="grainToggle" type="checkbox" checked /> <span>Film grain</span></label><label><input id="aaToggle" type="checkbox" checked /> <span>Anti-aliasing</span></label><label><input id="fpsToggle" type="checkbox" /> <span>FPS counter</span></label><label><input id="invertToggle" type="checkbox" /> <span>Invert look</span></label></div>
+          </div>
+          <div id="briefPanel" class="brief-panel hidden"><p>Relay Yard 7 was built as a compact test zone: a ground-level loading court, a service corridor, and an upper catwalk connected by two routes. Hit the marked targets to test the Vanta-9. Your position resets if you leave the playable volume.</p><div class="brief-stats"><span><b>01</b>RELAY YARD</span><span><b>02</b>UPPER LINE</span><span><b>03</b>MAINTENANCE</span></div></div>
+          <div class="modal-actions"><button id="resumeButton" class="primary-button" type="button">RESUME <span>↵</span></button><button id="resetButton" class="secondary-button" type="button">RESET PLAYER</button><button id="fullscreenButton" class="secondary-button" type="button">FULL SCREEN</button><button id="muteButton" class="secondary-button" type="button">MUTE AUDIO</button></div>
+          <p class="modal-hint">ESC TO RESUME <span>•</span> SETTINGS SAVE ON THIS DEVICE</p>
+        </div>
+      </section>
+
+      <section id="errorScreen" class="screen-panel error-screen hidden" role="alert"><div class="error-icon">!</div><p class="eyebrow accent">SYSTEM FAULT</p><h2>FIELD INITIALIZATION FAILED</h2><p id="errorMessage">Your browser could not start the 3D renderer.</p><button id="retryButton" class="primary-button" type="button">RETRY</button></section>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
