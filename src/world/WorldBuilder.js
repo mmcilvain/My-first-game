@@ -7,8 +7,8 @@ export class WorldBuilder {
     this.materials = materials;
     this.settings = { foliageDensity: 1, dynamicLights: 4, ...settings };
     this.mobileLighting = Boolean(this.settings.mobile);
-    this.normalFogColor = this.mobileLighting ? 0x254b4d : 0x193637;
-    this.normalFogDensity = this.mobileLighting ? .0082 : .0115;
+    this.normalFogColor = this.mobileLighting ? 0x35615e : 0x193637;
+    this.normalFogDensity = this.mobileLighting ? .0055 : .0115;
     this.root = new Group();
     this.root.name = 'RelayYard7';
     this.scene.add(this.root);
@@ -43,8 +43,8 @@ export class WorldBuilder {
     const geometry = new BoxGeometry(size[0], size[1], size[2]);
     const object = new Mesh(geometry, material);
     object.position.set(position[0], position[1], position[2]);
-    object.castShadow = options.castShadow ?? true;
-    object.receiveShadow = options.receiveShadow ?? true;
+    object.castShadow = !this.mobileLighting && (options.castShadow ?? true);
+    object.receiveShadow = !this.mobileLighting && (options.receiveShadow ?? true);
     if (options.rotation) object.rotation.set(...options.rotation);
     if (options.edge) {
       const edge = new LineSegments(new EdgesGeometry(geometry, 22), this.materials.edge);
@@ -65,9 +65,9 @@ export class WorldBuilder {
   }
 
   addLighting() {
-    const mobileBoost = this.mobileLighting ? 1.35 : 1;
+    const mobileBoost = this.mobileLighting ? 1.55 : 1;
     const hemisphere = new HemisphereLight(0x9bbdb5, 0x111718, 1.1 * mobileBoost);
-    const ambient = new AmbientLight(0x5f9284, this.mobileLighting ? .34 : .1);
+    const ambient = new AmbientLight(0x5f9284, this.mobileLighting ? .68 : .1);
     ambient.userData.baseIntensity = ambient.intensity;
     this.ambientLight = ambient;
     this.scene.add(hemisphere, ambient);
@@ -81,7 +81,7 @@ export class WorldBuilder {
     sun.shadow.bias = -.0005;
     this.scene.add(sun, sun.target);
 
-    const spawnFill = new PointLight(0x62c7ae, this.mobileLighting ? 2.35 : 1.1, 19, 2);
+    const spawnFill = new PointLight(0x62c7ae, this.mobileLighting ? 3.4 : 1.1, 19, 2);
     spawnFill.position.set(0, 4.5, 14);
     spawnFill.userData.baseIntensity = spawnFill.intensity;
     spawnFill.userData.flicker = false;
@@ -436,7 +436,7 @@ export class WorldBuilder {
       this.scene.fog.density = active ? .018 : this.normalFogDensity;
     }
     if (this.ambientLight) {
-      this.ambientLight.intensity = this.ambientLight.userData.baseIntensity * (active ? .72 : 1);
+      this.ambientLight.intensity = this.ambientLight.userData.baseIntensity * (active ? .46 : 1);
     }
     this.terminals.forEach((terminal) => {
       if (!terminal.activated) terminal.ring.material.emissiveIntensity = active ? 1.1 : 2.6;
