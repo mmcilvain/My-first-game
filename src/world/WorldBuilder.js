@@ -1,4 +1,4 @@
-import { AdditiveBlending, BackSide, BoxGeometry, Color, ConeGeometry, CylinderGeometry, DirectionalLight, DodecahedronGeometry, DoubleSide, EdgesGeometry, Group, HemisphereLight, LineSegments, Mesh, MeshBasicMaterial, MeshStandardMaterial, PlaneGeometry, PointLight, ShaderMaterial, SphereGeometry, TorusGeometry, Vector3 } from 'three';
+import { AdditiveBlending, AmbientLight, BackSide, BoxGeometry, Color, ConeGeometry, CylinderGeometry, DirectionalLight, DodecahedronGeometry, DoubleSide, EdgesGeometry, Group, HemisphereLight, LineSegments, Mesh, MeshBasicMaterial, MeshStandardMaterial, PlaneGeometry, PointLight, ShaderMaterial, SphereGeometry, TorusGeometry, Vector3 } from 'three';
 import { createBarrier, createBarrel, createCable, createCrate, createDoorFrame, createInstancedCrates, createPlanter, createPipe, createTargetDummy, createWeaponRack } from './Props.js';
 
 export class WorldBuilder {
@@ -6,6 +6,9 @@ export class WorldBuilder {
     this.scene = scene;
     this.materials = materials;
     this.settings = { foliageDensity: 1, dynamicLights: 4, ...settings };
+    this.mobileLighting = Boolean(this.settings.mobile);
+    this.normalFogColor = this.mobileLighting ? 0x254b4d : 0x193637;
+    this.normalFogDensity = this.mobileLighting ? .0082 : .0115;
     this.root = new Group();
     this.root.name = 'RelayYard7';
     this.scene.add(this.root);
@@ -62,9 +65,13 @@ export class WorldBuilder {
   }
 
   addLighting() {
-    const hemisphere = new HemisphereLight(0x9bbdb5, 0x111718, 1.1);
-    this.scene.add(hemisphere);
-    const sun = new DirectionalLight(0xdce9df, 2.15);
+    const mobileBoost = this.mobileLighting ? 1.35 : 1;
+    const hemisphere = new HemisphereLight(0x9bbdb5, 0x111718, 1.1 * mobileBoost);
+    const ambient = new AmbientLight(0x5f9284, this.mobileLighting ? .34 : .1);
+    ambient.userData.baseIntensity = ambient.intensity;
+    this.ambientLight = ambient;
+    this.scene.add(hemisphere, ambient);
+    const sun = new DirectionalLight(0xdce9df, 2.15 * (this.mobileLighting ? 1.12 : 1));
     sun.position.set(-18, 28, 12);
     sun.target.position.set(0, 0, -4);
     sun.castShadow = true;
@@ -73,6 +80,15 @@ export class WorldBuilder {
     sun.shadow.camera.near = 1; sun.shadow.camera.far = 90;
     sun.shadow.bias = -.0005;
     this.scene.add(sun, sun.target);
+
+    const spawnFill = new PointLight(0x62c7ae, this.mobileLighting ? 2.35 : 1.1, 19, 2);
+    spawnFill.position.set(0, 4.5, 14);
+    spawnFill.userData.baseIntensity = spawnFill.intensity;
+    spawnFill.userData.flicker = false;
+    spawnFill.userData.priority = 0;
+    this.scene.add(spawnFill);
+    this.lights.push(spawnFill);
+
     const fills = [
       { position: [-22, 4.2, -15], color: 0x5bf0c9, intensity: 2.8, distance: 11 },
       { position: [22, 5.5, -7], color: 0xffa14b, intensity: 2.4, distance: 12 },
@@ -416,8 +432,11 @@ export class WorldBuilder {
   setBlackout(active) {
     this.blackout = active;
     if (this.scene.fog) {
-      this.scene.fog.color.set(active ? 0x0d1019 : 0x193637);
-      this.scene.fog.density = active ? .018 : .0115;
+      this.scene.fog.color.set(active ? 0x0d1019 : this.normalFogColor);
+      this.scene.fog.density = active ? .018 : this.normalFogDensity;
+    }
+    if (this.ambientLight) {
+      this.ambientLight.intensity = this.ambientLight.userData.baseIntensity * (active ? .72 : 1);
     }
     this.terminals.forEach((terminal) => {
       if (!terminal.activated) terminal.ring.material.emissiveIntensity = active ? 1.1 : 2.6;
