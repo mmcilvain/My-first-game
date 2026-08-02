@@ -105,7 +105,7 @@ The game detects coarse pointer input, approximate device memory, and logical CP
 
 The renderer caps device pixel ratio on mobile. Repeated crates use instanced rendering. Particles and bullet marks use fixed pools. Physics uses a bounded fixed-step accumulator and a small number of active dynamic bodies. The scene uses frustum culling, distance-limited lights, simple collision boxes, and a custom inexpensive post-processing pass. Anti-aliasing is selected when the renderer is created, so changing that setting displays a restart notice; the other graphics settings apply immediately.
 
-For the smoothest mobile session, begin with Low, keep the browser tab visible, and use landscape orientation. High is intended for desktop GPUs.
+For the smoothest mobile session, begin with Medium or Low, keep the browser tab visible, and use landscape orientation. The mobile build includes extra ambient and spawn-area fill lighting so the mission remains readable without activating the blackout state. High is intended for desktop GPUs.
 
 ## Procedural asset notes
 
@@ -116,6 +116,8 @@ For the smoothest mobile session, begin with Low, keep the browser tab visible, 
 **Blank or fault screen:** Use a current browser with WebGL and hardware acceleration enabled. Reload after closing other GPU-heavy tabs.
 
 **Low frame rate:** Open Pause → Settings, choose Low, lower resolution scale, disable bloom/contact shading, reduce dynamic lights, and reduce particle density.
+
+**Scene looks too dark:** Use Medium or High, reload once after changing the graphics preset, and keep the device in landscape. Before all three relays are online, the scene should remain visible; the blackout lighting only activates during the hold-the-line phase.
 
 **No sound:** Tap/click the game first, confirm the tab is not muted, and use the pause menu volume control. The game remains playable when Web Audio is unavailable.
 
