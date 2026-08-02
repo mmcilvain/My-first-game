@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import { ACESFilmicToneMapping, Clock, Color, FogExp2, MathUtils, PCFSoftShadowMap, PerspectiveCamera, SRGBColorSpace, Scene, Vector2, WebGLRenderer } from 'three';
 import './styles.css';
 import { EnemySystem } from './game/EnemySystem.js';
 import { MissionSystem } from './game/MissionSystem.js';
@@ -108,11 +108,11 @@ class GameApp {
     const defaultPreset = this.device.lowPower ? 'low' : this.device.mobile ? 'medium' : 'high';
     this.settings = { preset: defaultPreset, ...presets[defaultPreset], sensitivity: 1, mobileSensitivity: .62, invertY: false, volume: .7, fps: false };
     this.loadSettings();
-    this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x0b1a21);
-    this.scene.fog = new THREE.FogExp2(0x193637, .0115);
-    this.camera = new THREE.PerspectiveCamera(76, 1, .04, 130);
-    this.clock = new THREE.Clock();
+    this.scene = new Scene();
+    this.scene.background = new Color(0x0b1a21);
+    this.scene.fog = new FogExp2(0x193637, .0115);
+    this.camera = new PerspectiveCamera(76, 1, .04, 130);
+    this.clock = new Clock();
     this.lastFrame = 0;
     this.elapsed = 0;
     this.playing = false;
@@ -124,8 +124,8 @@ class GameApp {
     this.round = 1;
     this.roundResetTimer = 0;
     this.hitMarkerTimer = 0;
-    this.input = { keys: new Set(), movement: new THREE.Vector2(), mobileMovement: new THREE.Vector2(), lookX: 0, lookY: 0, fire: false, aim: false, sprint: false, crouch: false, mobileCrouch: false, jumpPressed: false, reloadPressed: false, interactPressed: false, isMobile: this.device.mobile };
-    this.idleInput = { ...this.input, movement: new THREE.Vector2(), lookX: 0, lookY: 0, jumpPressed: false, reloadPressed: false, interactPressed: false, fire: false, aim: false, sprint: false, crouch: false };
+    this.input = { keys: new Set(), movement: new Vector2(), mobileMovement: new Vector2(), lookX: 0, lookY: 0, fire: false, aim: false, sprint: false, crouch: false, mobileCrouch: false, jumpPressed: false, reloadPressed: false, interactPressed: false, isMobile: this.device.mobile };
+    this.idleInput = { ...this.input, movement: new Vector2(), lookX: 0, lookY: 0, jumpPressed: false, reloadPressed: false, interactPressed: false, fire: false, aim: false, sprint: false, crouch: false };
     this.sound = new SoundEngine();
     this.dom = {
       canvas: $('#gameCanvas'),
@@ -218,12 +218,12 @@ class GameApp {
 
   createRenderer() {
     if (!this.dom.canvas.getContext('webgl2') && !this.dom.canvas.getContext('webgl')) throw new Error('WebGL is unavailable. Try a current version of Safari, Chrome, Edge, or Firefox with hardware acceleration enabled.');
-    this.renderer = new THREE.WebGLRenderer({ canvas: this.dom.canvas, antialias: this.settings.antialias, powerPreference: 'high-performance' });
-    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer = new WebGLRenderer({ canvas: this.dom.canvas, antialias: this.settings.antialias, powerPreference: 'high-performance' });
+    this.renderer.outputColorSpace = SRGBColorSpace;
+    this.renderer.toneMapping = ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.15;
     this.renderer.shadowMap.enabled = this.settings.shadowQuality > 0;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = PCFSoftShadowMap;
     this.renderer.setClearColor(0x0b1a21, 1);
   }
 
@@ -428,6 +428,15 @@ class GameApp {
     $('#targetStatus').style.color = state.state === 'blackout' ? '#ffb24d' : state.state === 'failed' ? '#ff5c66' : state.state === 'complete' ? '#76e8c6' : '';
     $('#missionObjective').textContent = state.objective;
     $('#missionProgress').textContent = state.progress;
+    const distance = state.distance == null ? '' : `${state.distance.toFixed(1)}M`;
+    const detail = state.state === 'blackout'
+      ? `HOLD ${state.remaining.toFixed(1)}S`
+      : distance
+        ? `DIST ${distance}`
+        : state.state === 'complete'
+          ? 'EXTRACTED'
+          : '';
+    $('#missionDistance').textContent = detail;
   }
 
   onPlayerDamage(amount, source) {
@@ -483,7 +492,7 @@ class GameApp {
     $('#stanceText').textContent = this.player.isCrouching ? 'CROUCHING' : this.player.isSprinting ? 'SPRINTING' : 'STANDING';
     $('#healthValue').textContent = this.player.health;
     $('#healthBar').style.width = `${this.player.health}%`;
-    const degrees = (THREE.MathUtils.radToDeg(this.player.yaw) % 360 + 360) % 360;
+    const degrees = (MathUtils.radToDeg(this.player.yaw) % 360 + 360) % 360;
     $('#compassDegrees').textContent = `${Math.round(degrees).toString().padStart(3, '0')}°`;
     $('#compassDirection').textContent = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.round(degrees / 45) % 8];
     $('#scoreValue').textContent = this.score.toString().padStart(5, '0');
@@ -497,7 +506,7 @@ class GameApp {
     const delta = Math.min(.05, this.lastFrame ? (time - this.lastFrame) / 1000 : .016);
     this.lastFrame = time;
     this.elapsed += delta;
-    this.fps = this.fps ? THREE.MathUtils.lerp(this.fps, 1 / Math.max(.001, delta), .08) : 1 / Math.max(.001, delta);
+    this.fps = this.fps ? MathUtils.lerp(this.fps, 1 / Math.max(.001, delta), .08) : 1 / Math.max(.001, delta);
     if (!this.renderer || document.hidden) return;
     this.syncInput();
     if (this.playing) {

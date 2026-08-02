@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import { AdditiveBlending, BufferAttribute, BufferGeometry, CircleGeometry, Mesh, MeshBasicMaterial, Points, PointsMaterial, Vector3 } from 'three';
 
 const particleTypes = {
   dust: { color: [0.62, 0.69, 0.62], life: .7, gravity: -.6, drag: .88 },
@@ -16,22 +16,22 @@ export class ParticleSystem {
     this.particles = Array.from({ length: this.maxParticles }, () => ({ active: false, life: 0, maxLife: 1, gravity: 0, drag: 1, r: 0, g: 0, b: 0, ambient: false }));
     this.positions = new Float32Array(this.maxParticles * 3);
     this.colors = new Float32Array(this.maxParticles * 3);
-    this.geometry = new THREE.BufferGeometry();
-    this.geometry.setAttribute('position', new THREE.BufferAttribute(this.positions, 3));
-    this.geometry.setAttribute('color', new THREE.BufferAttribute(this.colors, 3));
-    this.material = new THREE.PointsMaterial({ size: .075, vertexColors: true, transparent: true, opacity: .75, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true });
-    this.points = new THREE.Points(this.geometry, this.material);
+    this.geometry = new BufferGeometry();
+    this.geometry.setAttribute('position', new BufferAttribute(this.positions, 3));
+    this.geometry.setAttribute('color', new BufferAttribute(this.colors, 3));
+    this.material = new PointsMaterial({ size: .075, vertexColors: true, transparent: true, opacity: .75, depthWrite: false, blending: AdditiveBlending, sizeAttenuation: true });
+    this.points = new Points(this.geometry, this.material);
     this.points.frustumCulled = false;
     this.scene.add(this.points);
     this.nextParticle = 0;
     this.ambientCount = 0;
     this.decals = [];
     this.decalCursor = 0;
-    this.decalNormal = new THREE.Vector3(0, 0, 1);
-    this.decalGeometry = new THREE.CircleGeometry(.075, 8);
-    this.decalMaterial = new THREE.MeshBasicMaterial({ color: 0x0e1815, transparent: true, opacity: .66, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 });
+    this.decalNormal = new Vector3(0, 0, 1);
+    this.decalGeometry = new CircleGeometry(.075, 8);
+    this.decalMaterial = new MeshBasicMaterial({ color: 0x0e1815, transparent: true, opacity: .66, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 });
     for (let i = 0; i < 64; i += 1) {
-      const decal = new THREE.Mesh(this.decalGeometry, this.decalMaterial);
+      const decal = new Mesh(this.decalGeometry, this.decalMaterial);
       decal.visible = false;
       decal.renderOrder = 4;
       this.scene.add(decal);
@@ -106,7 +106,7 @@ export class ParticleSystem {
   }
 
   emit(position, type, count = 8, normal = null) {
-    const direction = new THREE.Vector3();
+    const direction = new Vector3();
     for (let i = 0; i < Math.round(count * this.density); i += 1) {
       direction.set(Math.random() - .5, Math.random() - .25, Math.random() - .5);
       if (normal) direction.addScaledVector(normal, .7);
@@ -133,7 +133,7 @@ export class ParticleSystem {
     decal.visible = true;
     decal.position.copy(point).addScaledVector(normal, .008);
     this.decalNormal.copy(normal).normalize();
-    decal.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), this.decalNormal);
+    decal.quaternion.setFromUnitVectors(new Vector3(0, 0, 1), this.decalNormal);
     const size = material === 'metal' ? .055 : material === 'glass' ? .065 : .08;
     decal.scale.set(size, size, size);
     decal.material.color.set(material === 'metal' ? 0x3a2413 : material === 'glass' ? 0x6d8d83 : 0x131b18);

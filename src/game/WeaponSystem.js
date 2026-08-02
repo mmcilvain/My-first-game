@@ -1,7 +1,7 @@
-import * as THREE from 'three';
+import { AdditiveBlending, BoxGeometry, BufferGeometry, CylinderGeometry, Float32BufferAttribute, Group, Line, LineBasicMaterial, MathUtils, Mesh, MeshBasicMaterial, PointLight, Raycaster, SphereGeometry, Vector3 } from 'three';
 
 function part(geometry, material, position, rotation = [0, 0, 0]) {
-  const object = new THREE.Mesh(geometry, material);
+  const object = new Mesh(geometry, material);
   object.position.set(...position);
   object.rotation.set(...rotation);
   object.castShadow = true;
@@ -16,21 +16,21 @@ export class WeaponSystem {
     this.particles = particles;
     this.audio = audio;
     this.callbacks = callbacks;
-    this.group = new THREE.Group();
+    this.group = new Group();
     this.group.name = 'Vanta9Viewmodel';
     this.camera.add(this.group);
     this.materials = world.materials;
-    this.raycaster = new THREE.Raycaster();
-    this.rayOrigin = new THREE.Vector3();
-    this.rayDirection = new THREE.Vector3();
-    this.muzzlePosition = new THREE.Vector3();
-    this.tracerEnd = new THREE.Vector3();
-    this.tracerStart = new THREE.Vector3();
-    this.impactNormal = new THREE.Vector3(0, 0, 1);
-    this.currentPosition = new THREE.Vector3();
-    this.currentRotation = new THREE.Vector3();
-    this.hipPosition = new THREE.Vector3();
-    this.aimPosition = new THREE.Vector3();
+    this.raycaster = new Raycaster();
+    this.rayOrigin = new Vector3();
+    this.rayDirection = new Vector3();
+    this.muzzlePosition = new Vector3();
+    this.tracerEnd = new Vector3();
+    this.tracerStart = new Vector3();
+    this.impactNormal = new Vector3(0, 0, 1);
+    this.currentPosition = new Vector3();
+    this.currentRotation = new Vector3();
+    this.hipPosition = new Vector3();
+    this.aimPosition = new Vector3();
     this.aimBlend = 0;
     this.recoil = 0;
     this.fireCooldown = 0;
@@ -46,15 +46,15 @@ export class WeaponSystem {
     this.shellCursor = 0;
     this.shells = [];
     this.shellStates = [];
-    this.muzzleLight = new THREE.PointLight(0xffc35c, 0, 4, 2);
-    this.muzzleFlash = new THREE.Mesh(new THREE.SphereGeometry(.08, 8, 6), new THREE.MeshBasicMaterial({ color: 0xffd37b, transparent: true, opacity: 0 }));
-    this.tracer = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0xffcf75, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }));
-    this.tracer.geometry.setAttribute('position', new THREE.Float32BufferAttribute(6, 3));
+    this.muzzleLight = new PointLight(0xffc35c, 0, 4, 2);
+    this.muzzleFlash = new Mesh(new SphereGeometry(.08, 8, 6), new MeshBasicMaterial({ color: 0xffd37b, transparent: true, opacity: 0 }));
+    this.tracer = new Line(new BufferGeometry(), new LineBasicMaterial({ color: 0xffcf75, transparent: true, opacity: 0, depthWrite: false, blending: AdditiveBlending }));
+    this.tracer.geometry.setAttribute('position', new Float32BufferAttribute(6, 3));
     this.tracer.frustumCulled = false;
     this.world.root.parent.add(this.tracer);
-    this.shellGeometry = new THREE.CylinderGeometry(.018, .024, .085, 6);
+    this.shellGeometry = new CylinderGeometry(.018, .024, .085, 6);
     for (let i = 0; i < 18; i += 1) {
-      const shell = new THREE.Mesh(this.shellGeometry, this.materials.amberHot);
+      const shell = new Mesh(this.shellGeometry, this.materials.amberHot);
       shell.visible = false; shell.castShadow = false; shell.renderOrder = 5; this.group.add(shell);
       this.shells.push(shell); this.shellStates.push({ active: false, life: 0, vx: 0, vy: 0, vz: 0, spin: 0 });
     }
@@ -62,24 +62,24 @@ export class WeaponSystem {
   }
 
   buildViewmodel() {
-    const receiver = part(new THREE.BoxGeometry(.24, .22, .72), this.materials.metalDark, [0, 0, 0]);
-    receiver.add(part(new THREE.BoxGeometry(.16, .08, .36), this.materials.metal, [0, .13, -.02]));
+    const receiver = part(new BoxGeometry(.24, .22, .72), this.materials.metalDark, [0, 0, 0]);
+    receiver.add(part(new BoxGeometry(.16, .08, .36), this.materials.metal, [0, .13, -.02]));
     this.group.add(receiver);
-    const barrel = part(new THREE.CylinderGeometry(.045, .055, .48, 10), this.materials.black, [0, .02, -.58], [Math.PI / 2, 0, 0]);
+    const barrel = part(new CylinderGeometry(.045, .055, .48, 10), this.materials.black, [0, .02, -.58], [Math.PI / 2, 0, 0]);
     this.group.add(barrel);
-    const muzzle = part(new THREE.CylinderGeometry(.08, .06, .11, 10), this.materials.metalDark, [0, .02, -.84], [Math.PI / 2, 0, 0]);
+    const muzzle = part(new CylinderGeometry(.08, .06, .11, 10), this.materials.metalDark, [0, .02, -.84], [Math.PI / 2, 0, 0]);
     this.group.add(muzzle);
-    const magazine = part(new THREE.BoxGeometry(.15, .34, .22), this.materials.militaryDark, [0, -.28, .08], [.2, 0, 0]);
+    const magazine = part(new BoxGeometry(.15, .34, .22), this.materials.militaryDark, [0, -.28, .08], [.2, 0, 0]);
     this.group.add(magazine);
-    const grip = part(new THREE.BoxGeometry(.13, .29, .15), this.materials.rubber, [0, -.25, .34], [-.17, 0, 0]);
+    const grip = part(new BoxGeometry(.13, .29, .15), this.materials.rubber, [0, -.25, .34], [-.17, 0, 0]);
     this.group.add(grip);
-    const stock = part(new THREE.BoxGeometry(.18, .18, .38), this.materials.militaryPaint, [0, -.01, .53]);
-    stock.add(part(new THREE.BoxGeometry(.23, .14, .1), this.materials.fabric, [0, -.04, .22]));
+    const stock = part(new BoxGeometry(.18, .18, .38), this.materials.militaryPaint, [0, -.01, .53]);
+    stock.add(part(new BoxGeometry(.23, .14, .1), this.materials.fabric, [0, -.04, .22]));
     this.group.add(stock);
-    const rail = part(new THREE.BoxGeometry(.1, .05, .58), this.materials.black, [0, .16, -.12]);
+    const rail = part(new BoxGeometry(.1, .05, .58), this.materials.black, [0, .16, -.12]);
     this.group.add(rail);
-    this.group.add(part(new THREE.BoxGeometry(.08, .14, .08), this.materials.cyan, [0, .24, -.31]));
-    const handGeometry = new THREE.SphereGeometry(.12, 10, 8);
+    this.group.add(part(new BoxGeometry(.08, .14, .08), this.materials.cyan, [0, .24, -.31]));
+    const handGeometry = new SphereGeometry(.12, 10, 8);
     const glove = this.materials.fabric;
     this.group.add(part(handGeometry, glove, [-.18, -.19, .12], [0, 0, 0]));
     this.group.add(part(handGeometry, glove, [.15, -.19, .31], [0, 0, 0]));
@@ -97,10 +97,10 @@ export class WeaponSystem {
       if (this.reloadTimer <= 0) this.finishReload();
     }
     const targetAim = input.aim ? 1 : 0;
-    this.aimBlend = THREE.MathUtils.damp(this.aimBlend, targetAim, 13, delta);
+    this.aimBlend = MathUtils.damp(this.aimBlend, targetAim, 13, delta);
     if (input.reloadPressed) this.reload();
     if (input.fire && !this.reloading) this.fire(player);
-    this.recoil = THREE.MathUtils.damp(this.recoil, 0, 16, delta);
+    this.recoil = MathUtils.damp(this.recoil, 0, 16, delta);
     const moving = player.velocity.lengthSq() > .05;
     const sway = moving ? .012 : .006;
     const sprintPose = player.isSprinting ? 1 : 0;
@@ -114,9 +114,9 @@ export class WeaponSystem {
     this.currentPosition.z += sprintPose * .14;
     this.group.position.copy(this.currentPosition);
     this.currentRotation.set(-this.recoil * .32 + bob * .8, bob * .45, this.recoil * .15 + sprintPose * -.24);
-    this.group.rotation.x = THREE.MathUtils.damp(this.group.rotation.x, this.currentRotation.x, 18, delta);
-    this.group.rotation.y = THREE.MathUtils.damp(this.group.rotation.y, this.currentRotation.y, 18, delta);
-    this.group.rotation.z = THREE.MathUtils.damp(this.group.rotation.z, this.currentRotation.z, 18, delta);
+    this.group.rotation.x = MathUtils.damp(this.group.rotation.x, this.currentRotation.x, 18, delta);
+    this.group.rotation.y = MathUtils.damp(this.group.rotation.y, this.currentRotation.y, 18, delta);
+    this.group.rotation.z = MathUtils.damp(this.group.rotation.z, this.currentRotation.z, 18, delta);
     this.muzzleLight.intensity = this.muzzleFlash.material.opacity * 5;
     this.muzzleFlash.material.opacity = Math.max(0, this.muzzleFlash.material.opacity - delta * 18);
     this.muzzleLight.intensity = this.muzzleFlash.material.opacity * 5;
@@ -125,7 +125,7 @@ export class WeaponSystem {
     this.tracer.visible = this.tracerTimer > 0;
     this.tracer.material.opacity = Math.min(1, this.tracerTimer * 24) * .72;
     const targetFov = player.settings.fov - this.aimBlend * 11 + sprintPose * 6;
-    this.camera.fov = THREE.MathUtils.damp(this.camera.fov, targetFov, 15, delta);
+    this.camera.fov = MathUtils.damp(this.camera.fov, targetFov, 15, delta);
     this.camera.updateProjectionMatrix();
     this.callbacks.onState?.(this.getState());
   }

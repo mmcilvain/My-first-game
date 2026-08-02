@@ -1,6 +1,6 @@
-import * as THREE from 'three';
+import { Vector3 } from 'three';
 
-const UP = new THREE.Vector3(0, 1, 0);
+const UP = new Vector3(0, 1, 0);
 
 function overlapsAabb(position, radius, height, box) {
   return position.x + radius > box.min.x && position.x - radius < box.max.x &&
@@ -16,10 +16,10 @@ export class PhysicsSystem {
     this.fixedStep = 1 / 60;
     this.maxSubsteps = 4;
     this.gravity = -18;
-    this._candidate = new THREE.Vector3();
-    this._bodyTarget = new THREE.Vector3();
-    this._rayDirection = new THREE.Vector3();
-    this._rayOrigin = new THREE.Vector3();
+    this._candidate = new Vector3();
+    this._bodyTarget = new Vector3();
+    this._rayDirection = new Vector3();
+    this._rayOrigin = new Vector3();
   }
 
   addBody(object, options = {}) {
@@ -29,7 +29,7 @@ export class PhysicsSystem {
       radius: options.radius ?? .5,
       height: options.height ?? 1,
       mass: options.mass ?? 10,
-      velocity: new THREE.Vector3(),
+      velocity: new Vector3(),
       grounded: false,
       sleeping: false,
       sleepTimer: 0,
@@ -115,7 +115,7 @@ export class PhysicsSystem {
     }
     if (tMin < 0 || tMin > maxDistance) return null;
     const point = this._rayOrigin.clone().addScaledVector(this._rayDirection, tMin);
-    const normal = new THREE.Vector3();
+    const normal = new Vector3();
     if (nearAxis) normal[nearAxis] = nearSign;
     return { distance: tMin, point, normal, material: box.material ?? 'concrete', box };
   }

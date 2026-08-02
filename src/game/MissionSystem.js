@@ -123,6 +123,21 @@ export class MissionSystem {
     this.callbacks.onFail?.();
   }
 
+  getObjectiveDistance() {
+    if (this.state === 'activate') {
+      let nearestDistance = Infinity;
+      for (const terminal of this.world.terminals ?? []) {
+        if (!terminal.activated) nearestDistance = Math.min(nearestDistance, this.player.position.distanceTo(terminal.position));
+      }
+      return Number.isFinite(nearestDistance) ? nearestDistance : null;
+    }
+    if (this.state === 'extract') {
+      const extraction = this.world.extractionZone;
+      return extraction ? this.player.position.distanceTo(extraction.position) : null;
+    }
+    return null;
+  }
+
   getState() {
     const total = this.world.terminals?.length ?? 0;
     const progress = this.activated.size + '/' + total;
@@ -134,7 +149,14 @@ export class MissionSystem {
       complete: { objective: 'MISSION COMPLETE', status: 'SUCCESS', progress },
       failed: { objective: 'MISSION FAILED', status: 'FAILED', progress },
     };
-    return { state: this.state, elapsed: this.elapsed, ...states[this.state] };
+    const remaining = this.state === 'blackout' ? Math.max(0, this.blackoutTimer) : 0;
+    return {
+      state: this.state,
+      elapsed: this.elapsed,
+      ...states[this.state],
+      distance: this.getObjectiveDistance(),
+      remaining,
+    };
   }
 
   emitState() {
