@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import { MathUtils, Vector3 } from 'three';
 
 export class EnemySystem {
   constructor(world, physics, particles, audio, callbacks = {}) {
@@ -9,7 +9,7 @@ export class EnemySystem {
     this.callbacks = callbacks;
     this.time = 0;
     this.active = false;
-    this.playerEye = new THREE.Vector3();
+    this.playerEye = new Vector3();
     this.enemies = world.targets.map((group, index) => {
       const targetData = group.userData.targetData;
       targetData.kind = 'enemy';
@@ -23,9 +23,9 @@ export class EnemySystem {
         alerted: false,
         dead: false,
         reactionTimer: 0,
-        origin: new THREE.Vector3(),
-        toPlayer: new THREE.Vector3(),
-        direction: new THREE.Vector3(),
+        origin: new Vector3(),
+        toPlayer: new Vector3(),
+        direction: new Vector3(),
       };
       group.userData.enemyState = state;
       return state;
@@ -99,7 +99,7 @@ export class EnemySystem {
 
       enemy.alerted = true;
       const targetYaw = Math.atan2(direction.x, direction.z);
-      group.rotation.y = THREE.MathUtils.damp(group.rotation.y, targetYaw, 8, delta);
+      group.rotation.y = MathUtils.damp(group.rotation.y, targetYaw, 8, delta);
       enemy.attackTimer -= delta;
       if (enemy.attackTimer <= 0) this.attack(enemy, player, origin, direction);
     }
