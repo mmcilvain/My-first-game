@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import { CanvasTexture, LinearFilter, LinearMipmapLinearFilter, NoColorSpace, RepeatWrapping, SRGBColorSpace } from 'three';
 
 const textureCache = new Map();
 
@@ -8,13 +8,13 @@ function hashNoise(x, y, seed) {
 }
 
 function configureTexture(texture, repeat = 1, anisotropy = 4, color = false) {
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
+  texture.wrapS = RepeatWrapping;
+  texture.wrapT = RepeatWrapping;
   texture.repeat.set(repeat, repeat);
-  texture.magFilter = THREE.LinearFilter;
-  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.magFilter = LinearFilter;
+  texture.minFilter = LinearMipmapLinearFilter;
   texture.anisotropy = anisotropy;
-  if (color) texture.colorSpace = THREE.SRGBColorSpace;
+  if (color) texture.colorSpace = SRGBColorSpace;
   texture.needsUpdate = true;
   return texture;
 }
@@ -137,11 +137,11 @@ function makeMaps(name, options) {
   drawNormalDetail(normalContext, size, options.seed + 9, options.kind === 'metal' ? 1.7 : 2.35);
 
   const maps = {
-    map: configureTexture(new THREE.CanvasTexture(colorCanvas), options.repeat, options.anisotropy, true),
-    roughnessMap: configureTexture(new THREE.CanvasTexture(roughCanvas), options.repeat, options.anisotropy),
-    normalMap: configureTexture(new THREE.CanvasTexture(normalCanvas), options.repeat, options.anisotropy),
+    map: configureTexture(new CanvasTexture(colorCanvas), options.repeat, options.anisotropy, true),
+    roughnessMap: configureTexture(new CanvasTexture(roughCanvas), options.repeat, options.anisotropy),
+    normalMap: configureTexture(new CanvasTexture(normalCanvas), options.repeat, options.anisotropy),
   };
-  maps.normalMap.colorSpace = THREE.NoColorSpace;
+  maps.normalMap.colorSpace = NoColorSpace;
   textureCache.set(name, maps);
   return maps;
 }
