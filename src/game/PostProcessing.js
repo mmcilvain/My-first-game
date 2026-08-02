@@ -65,10 +65,10 @@ export class PostProcessing {
         resolution: { value: new Vector2(1, 1) },
         time: { value: 0 },
         bloom: { value: 1 },
-        vignette: { value: this.settings.mobile ? .12 : .22 },
+        vignette: { value: this.settings.mobile ? .08 : .22 },
         grain: { value: .45 },
-        contrast: { value: this.settings.mobile ? 1.015 : 1.075 },
-        ao: { value: 1 },
+        contrast: { value: this.settings.mobile ? .98 : 1.075 },
+        ao: { value: this.settings.mobile ? 0 : 1 },
       },
       vertexShader,
       fragmentShader,
@@ -90,10 +90,10 @@ export class PostProcessing {
   setSettings(settings) {
     this.settings = { ...this.settings, ...settings };
     this.material.uniforms.bloom.value = this.settings.bloom ? 1 : 0;
-    this.material.uniforms.ao.value = this.settings.ao ? 1 : 0;
+    this.material.uniforms.ao.value = this.settings.ao && !this.settings.mobile ? 1 : 0;
     this.material.uniforms.grain.value = this.settings.grain ? .45 : 0;
-    this.material.uniforms.vignette.value = this.settings.mobile ? .12 : .22;
-    this.material.uniforms.contrast.value = this.settings.mobile ? 1.015 : 1.075;
+    this.material.uniforms.vignette.value = this.settings.mobile ? .08 : .22;
+    this.material.uniforms.contrast.value = this.settings.mobile ? .98 : 1.075;
   }
 
   render(scene, camera, time) {
