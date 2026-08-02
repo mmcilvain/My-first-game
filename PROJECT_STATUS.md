@@ -56,6 +56,7 @@ The production output is written to `dist/`.
 - `src/world/` — procedural textures, materials, props, and world construction
 - `README.md` — project documentation
 - `vercel.json` — static Vite deployment configuration
+- `vite.config.js` — production chunk-splitting configuration
 
 ## Current game state
 
@@ -68,6 +69,7 @@ The current build includes:
 - Procedural Vanta-9 tactical carbine viewmodel with receiver, barrel, magazine, grip, stock, sights, gloves, recoil, sway, ADS, muzzle flash, shell ejection, tracers, reloads, ammo, and dry-fire feedback
 - Moving targets, head/body hit zones, headshots, scoring, rounds, combos, hit markers, target resets, and field-clear feedback
 - Phase 1 Operation Nightfall mission: three relay terminals, extraction zone, hostile security-unit pressure, player damage/death, blackout state, mission success/failure/restart
+- Phase 2 performance/combat-readability pass: Three.js vendor chunk splitting, lower enemy allocation churn, live objective distance, and blackout countdown feedback
 - Desktop controls: WASD, mouse look, pointer lock, left-click fire, right-click ADS, Shift sprint, Space jump, C/Ctrl crouch, R reload, E interact, Esc pause
 - Mobile controls: virtual joystick, drag look region, fire, ADS, jump, crouch, sprint, reload, fullscreen support, safe-area padding, and orientation messaging
 - Graphics presets: Low, Medium, High
