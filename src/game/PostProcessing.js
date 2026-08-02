@@ -16,6 +16,7 @@ const fragmentShader = `
   uniform float vignette;
   uniform float grain;
   uniform float contrast;
+  uniform float shadowLift;
   uniform float ao;
   varying vec2 vUv;
 
@@ -41,6 +42,7 @@ const fragmentShader = `
       float contact = texture2D(tDiffuse, vUv + vec2(0.0, pixel.y * 1.5)).r - texture2D(tDiffuse, vUv - vec2(0.0, pixel.y * 1.5)).r;
       color *= 1.0 - max(0.0, -contact) * .12 * ao;
     }
+    color = mix(color, sqrt(max(color, vec3(0.0))), shadowLift);
     color = (color - .5) * contrast + .5;
     color *= vec3(1.02, 1.0, .96);
     float sharpen = dot(color - (sampleScene(vUv + vec2(pixel.x, 0.0)) + sampleScene(vUv - vec2(pixel.x, 0.0)) + sampleScene(vUv + vec2(0.0, pixel.y)) + sampleScene(vUv - vec2(0.0, pixel.y))) * .25, vec3(.333));
@@ -68,6 +70,7 @@ export class PostProcessing {
         vignette: { value: this.settings.mobile ? .08 : .22 },
         grain: { value: .45 },
         contrast: { value: this.settings.mobile ? .98 : 1.075 },
+        shadowLift: { value: this.settings.mobile ? .24 : 0 },
         ao: { value: this.settings.mobile ? 0 : 1 },
       },
       vertexShader,
@@ -94,6 +97,7 @@ export class PostProcessing {
     this.material.uniforms.grain.value = this.settings.grain ? .45 : 0;
     this.material.uniforms.vignette.value = this.settings.mobile ? .08 : .22;
     this.material.uniforms.contrast.value = this.settings.mobile ? .98 : 1.075;
+    this.material.uniforms.shadowLift.value = this.settings.mobile ? .24 : 0;
   }
 
   render(scene, camera, time) {
