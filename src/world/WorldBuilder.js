@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import { AdditiveBlending, BackSide, BoxGeometry, Color, ConeGeometry, CylinderGeometry, DirectionalLight, DodecahedronGeometry, DoubleSide, EdgesGeometry, Group, HemisphereLight, LineSegments, Mesh, MeshBasicMaterial, MeshStandardMaterial, PlaneGeometry, PointLight, ShaderMaterial, SphereGeometry, TorusGeometry, Vector3 } from 'three';
 import { createBarrier, createBarrel, createCable, createCrate, createDoorFrame, createInstancedCrates, createPlanter, createPipe, createTargetDummy, createWeaponRack } from './Props.js';
 
 export class WorldBuilder {
@@ -6,7 +6,7 @@ export class WorldBuilder {
     this.scene = scene;
     this.materials = materials;
     this.settings = { foliageDensity: 1, dynamicLights: 4, ...settings };
-    this.root = new THREE.Group();
+    this.root = new Group();
     this.root.name = 'RelayYard7';
     this.scene.add(this.root);
     this.collisionBoxes = [];
@@ -21,7 +21,7 @@ export class WorldBuilder {
     this.hazeMeshes = [];
     this.time = 0;
     this.blackout = false;
-    this.spawn = new THREE.Vector3(0, .02, 18);
+    this.spawn = new Vector3(0, .02, 18);
   }
 
   build() {
@@ -37,14 +37,14 @@ export class WorldBuilder {
   }
 
   addBox(position, size, material, options = {}) {
-    const geometry = new THREE.BoxGeometry(size[0], size[1], size[2]);
-    const object = new THREE.Mesh(geometry, material);
+    const geometry = new BoxGeometry(size[0], size[1], size[2]);
+    const object = new Mesh(geometry, material);
     object.position.set(position[0], position[1], position[2]);
     object.castShadow = options.castShadow ?? true;
     object.receiveShadow = options.receiveShadow ?? true;
     if (options.rotation) object.rotation.set(...options.rotation);
     if (options.edge) {
-      const edge = new THREE.LineSegments(new THREE.EdgesGeometry(geometry, 22), this.materials.edge);
+      const edge = new LineSegments(new EdgesGeometry(geometry, 22), this.materials.edge);
       edge.renderOrder = 2;
       object.add(edge);
     }
@@ -55,16 +55,16 @@ export class WorldBuilder {
 
   addCollision(position, size, material = 'concrete') {
     this.collisionBoxes.push({
-      min: new THREE.Vector3(position[0] - size[0] / 2, position[1] - size[1] / 2, position[2] - size[2] / 2),
-      max: new THREE.Vector3(position[0] + size[0] / 2, position[1] + size[1] / 2, position[2] + size[2] / 2),
+      min: new Vector3(position[0] - size[0] / 2, position[1] - size[1] / 2, position[2] - size[2] / 2),
+      max: new Vector3(position[0] + size[0] / 2, position[1] + size[1] / 2, position[2] + size[2] / 2),
       material,
     });
   }
 
   addLighting() {
-    const hemisphere = new THREE.HemisphereLight(0x9bbdb5, 0x111718, 1.1);
+    const hemisphere = new HemisphereLight(0x9bbdb5, 0x111718, 1.1);
     this.scene.add(hemisphere);
-    const sun = new THREE.DirectionalLight(0xdce9df, 2.15);
+    const sun = new DirectionalLight(0xdce9df, 2.15);
     sun.position.set(-18, 28, 12);
     sun.target.position.set(0, 0, -4);
     sun.castShadow = true;
@@ -82,14 +82,14 @@ export class WorldBuilder {
       { position: [4, 7.4, -14], color: 0x80f2d0, intensity: 1.8, distance: 10 },
     ];
     fills.forEach((data, index) => {
-      const light = new THREE.PointLight(data.color, data.intensity, data.distance, 2);
+      const light = new PointLight(data.color, data.intensity, data.distance, 2);
       light.position.set(...data.position);
       light.userData.baseIntensity = data.intensity;
       light.userData.flicker = index % 2 === 0;
       light.userData.priority = index < 4 ? 0 : 1;
       this.scene.add(light);
       this.lights.push(light);
-      const lamp = new THREE.Mesh(new THREE.BoxGeometry(.18, .18, .18), this.materials.cyan);
+      const lamp = new Mesh(new BoxGeometry(.18, .18, .18), this.materials.cyan);
       lamp.position.copy(light.position);
       lamp.castShadow = false;
       this.root.add(lamp);
@@ -105,42 +105,42 @@ export class WorldBuilder {
     for (const x of [-20, -11, 11, 20]) this.addBox([x, .03, 9], [1.3, .025, 25], this.materials.concreteDark, { collision: false, castShadow: false });
     const puddles = [[-14, 11, 4.8, 1.2, -.08], [8, 16, 3.1, .8, .12], [24, 9, 4.2, 1.05, -.04], [-2, -7, 2.8, .65, .07]];
     puddles.forEach(([x, z, width, depth, rotation]) => {
-      const puddle = new THREE.Mesh(new THREE.PlaneGeometry(width, depth), this.materials.puddle);
+      const puddle = new Mesh(new PlaneGeometry(width, depth), this.materials.puddle);
       puddle.rotation.set(-Math.PI / 2, 0, rotation); puddle.position.set(x, .035, z);
       puddle.receiveShadow = true; this.root.add(puddle);
     });
     for (const x of [-18, -9, 9, 18]) this.addBox([x, .045, 20.8], [5.5, .018, .035], this.materials.trim, { collision: false, castShadow: false, receiveShadow: false });
     for (const z of [4.2, 8.5, 12.8, 17.1]) this.addBox([-20.4, .047, z], [.035, .018, 3.8], this.materials.warning, { collision: false, castShadow: false, receiveShadow: false });
-    const drainRing = new THREE.Mesh(new THREE.TorusGeometry(.68, .045, 6, 20), this.materials.trim);
+    const drainRing = new Mesh(new TorusGeometry(.68, .045, 6, 20), this.materials.trim);
     drainRing.rotation.x = -Math.PI / 2; drainRing.position.set(7.5, .055, 7.5); drainRing.receiveShadow = true; this.root.add(drainRing);
     this.addBox([7.5, .057, 7.5], [1.05, .018, .08], this.materials.black, { collision: false, castShadow: false, receiveShadow: false });
   }
 
   addBackdrop() {
-    const sky = new THREE.Mesh(new THREE.SphereGeometry(115, 20, 12), new THREE.ShaderMaterial({
-      side: THREE.BackSide, depthWrite: false,
-      uniforms: { top: { value: new THREE.Color(0x07131c) }, horizon: { value: new THREE.Color(0x35584f) }, sun: { value: new THREE.Color(0xffbf7a) } },
+    const sky = new Mesh(new SphereGeometry(115, 20, 12), new ShaderMaterial({
+      side: BackSide, depthWrite: false,
+      uniforms: { top: { value: new Color(0x07131c) }, horizon: { value: new Color(0x35584f) }, sun: { value: new Color(0xffbf7a) } },
       vertexShader: 'varying vec3 vWorld; void main(){ vWorld=normalize((modelMatrix*vec4(position,1.0)).xyz); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }',
       fragmentShader: 'uniform vec3 top; uniform vec3 horizon; uniform vec3 sun; varying vec3 vWorld; void main(){ float h=smoothstep(-.28,.48,vWorld.y); vec3 c=mix(horizon,top,h); float glow=pow(max(0.0,dot(vWorld,normalize(vec3(-.55,.28,.55)))),18.0); gl_FragColor=vec4(c+sun*glow*.55,1.0); }',
     }));
     sky.position.y = 12; sky.frustumCulled = false; this.root.add(sky);
-    const skylineMaterial = new THREE.MeshStandardMaterial({ color: 0x102521, roughness: .9, metalness: .18 });
-    const windowMaterial = new THREE.MeshStandardMaterial({ color: 0x73d7bd, emissive: 0x1b6b59, emissiveIntensity: 1.6, roughness: .38 });
+    const skylineMaterial = new MeshStandardMaterial({ color: 0x102521, roughness: .9, metalness: .18 });
+    const windowMaterial = new MeshStandardMaterial({ color: 0x73d7bd, emissive: 0x1b6b59, emissiveIntensity: 1.6, roughness: .38 });
     for (let i = 0; i < 28; i += 1) {
       const angle = (i / 28) * Math.PI * 2;
       const radius = 58 + (i % 4) * 4;
       const height = 9 + (i * 7) % 18;
-      const building = new THREE.Mesh(new THREE.BoxGeometry(3 + (i % 3) * 1.8, height, 3.4 + (i % 2) * 2), skylineMaterial);
+      const building = new Mesh(new BoxGeometry(3 + (i % 3) * 1.8, height, 3.4 + (i % 2) * 2), skylineMaterial);
       building.position.set(Math.cos(angle) * radius, height / 2 - 1, Math.sin(angle) * radius); building.castShadow = false; building.receiveShadow = false; this.root.add(building);
       if (i % 2 === 0) {
-        const windowBand = new THREE.Mesh(new THREE.BoxGeometry(building.geometry.parameters.width + .03, .22, .05), windowMaterial);
+        const windowBand = new Mesh(new BoxGeometry(building.geometry.parameters.width + .03, .22, .05), windowMaterial);
         windowBand.position.copy(building.position); windowBand.position.y += height * .18; windowBand.lookAt(0, windowBand.position.y, 0); this.root.add(windowBand);
       }
     }
-    const coneGeometry = new THREE.ConeGeometry(3.8, 17, 18, 1, true);
-    const hazeMaterial = new THREE.MeshBasicMaterial({ color: 0x80f2d0, transparent: true, opacity: .045, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+    const coneGeometry = new ConeGeometry(3.8, 17, 18, 1, true);
+    const hazeMaterial = new MeshBasicMaterial({ color: 0x80f2d0, transparent: true, opacity: .045, depthWrite: false, side: DoubleSide, blending: AdditiveBlending });
     [[-22, 7, -15], [22, 8, -7], [4, 8, -14]].forEach((position, index) => {
-      const haze = new THREE.Mesh(coneGeometry, hazeMaterial); haze.position.set(...position); haze.rotation.x = Math.PI; haze.userData.phase = index * 2.4; this.root.add(haze); this.hazeMeshes.push(haze);
+      const haze = new Mesh(coneGeometry, hazeMaterial); haze.position.set(...position); haze.rotation.x = Math.PI; haze.userData.phase = index * 2.4; this.root.add(haze); this.hazeMeshes.push(haze);
     });
   }
 
@@ -224,49 +224,49 @@ export class WorldBuilder {
   }
 
   addRelayMast() {
-    const mast = new THREE.Group();
+    const mast = new Group();
     mast.position.set(0, 0, -20.5);
-    const postGeometry = new THREE.CylinderGeometry(.13, .18, 8.2, 8);
+    const postGeometry = new CylinderGeometry(.13, .18, 8.2, 8);
     for (const [x, z] of [[-.95, -.65], [.95, -.65], [-.95, .65], [.95, .65]]) {
-      const post = new THREE.Mesh(postGeometry, this.materials.metalDark);
+      const post = new Mesh(postGeometry, this.materials.metalDark);
       post.position.set(x, 4.1, z); post.castShadow = true; mast.add(post);
     }
-    const braceGeometry = new THREE.BoxGeometry(2.55, .07, .07);
+    const braceGeometry = new BoxGeometry(2.55, .07, .07);
     for (const y of [1.4, 3.1, 4.8, 6.5]) {
-      const brace = new THREE.Mesh(braceGeometry, this.materials.trim);
+      const brace = new Mesh(braceGeometry, this.materials.trim);
       brace.position.y = y; brace.rotation.z = Math.PI / 2; mast.add(brace);
       const cross = brace.clone(); cross.rotation.set(0, Math.PI / 2, 0); cross.scale.z = .8; mast.add(cross);
     }
-    const platform = new THREE.Mesh(new THREE.CylinderGeometry(1.65, 1.65, .12, 16), this.materials.metalDark);
+    const platform = new Mesh(new CylinderGeometry(1.65, 1.65, .12, 16), this.materials.metalDark);
     platform.position.y = 5.85; platform.castShadow = true; mast.add(platform);
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(1.46, .055, 8, 32), this.materials.trim);
+    const ring = new Mesh(new TorusGeometry(1.46, .055, 8, 32), this.materials.trim);
     ring.position.y = 5.94; mast.add(ring);
-    const dish = new THREE.Mesh(new THREE.SphereGeometry(.86, 16, 8, 0, Math.PI * 2, 0, Math.PI * .52), this.materials.panel);
+    const dish = new Mesh(new SphereGeometry(.86, 16, 8, 0, Math.PI * 2, 0, Math.PI * .52), this.materials.panel);
     dish.position.set(0, 6.7, 0); dish.rotation.x = -.42; mast.add(dish);
-    const antenna = new THREE.Mesh(new THREE.CylinderGeometry(.045, .08, 2.3, 8), this.materials.trim);
+    const antenna = new Mesh(new CylinderGeometry(.045, .08, 2.3, 8), this.materials.trim);
     antenna.position.y = 8.2; mast.add(antenna);
-    const beacon = new THREE.Mesh(new THREE.SphereGeometry(.13, 10, 8), this.materials.amberHot);
+    const beacon = new Mesh(new SphereGeometry(.13, 10, 8), this.materials.amberHot);
     beacon.position.y = 9.35; mast.add(beacon); this.glowMeshes.push(beacon);
-    const screen = new THREE.Mesh(new THREE.BoxGeometry(1.1, .38, .035), this.materials.screen);
+    const screen = new Mesh(new BoxGeometry(1.1, .38, .035), this.materials.screen);
     screen.position.set(0, 2.5, -.72); mast.add(screen); this.glowMeshes.push(screen);
     mast.traverse((child) => { if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; } });
     this.root.add(mast);
-    const mastLight = new THREE.PointLight(0xff9652, 1.9, 8, 2);
+    const mastLight = new PointLight(0xff9652, 1.9, 8, 2);
     mastLight.position.set(0, 8.7, -20.5); mastLight.userData.baseIntensity = 1.9; mastLight.userData.flicker = true; mastLight.userData.priority = 1;
     this.scene.add(mastLight); this.lights.push(mastLight);
   }
 
   addWindow(position, size, rotationY = 0) {
-    const frame = new THREE.Group();
-    const glass = new THREE.Mesh(new THREE.PlaneGeometry(size[0], size[1]), this.materials.glass);
+    const frame = new Group();
+    const glass = new Mesh(new PlaneGeometry(size[0], size[1]), this.materials.glass);
     glass.position.set(0, 0, .01);
     frame.add(glass);
-    const vertical = new THREE.BoxGeometry(.1, size[1] + .25, .15);
-    for (const x of [-size[0] / 2, size[0] / 2]) { const post = new THREE.Mesh(vertical, this.materials.glassFrame); post.position.set(x, 0, 0); frame.add(post); }
-    const horizontal = new THREE.Mesh(new THREE.BoxGeometry(size[0] + .2, .1, .15), this.materials.glassFrame);
+    const vertical = new BoxGeometry(.1, size[1] + .25, .15);
+    for (const x of [-size[0] / 2, size[0] / 2]) { const post = new Mesh(vertical, this.materials.glassFrame); post.position.set(x, 0, 0); frame.add(post); }
+    const horizontal = new Mesh(new BoxGeometry(size[0] + .2, .1, .15), this.materials.glassFrame);
     horizontal.position.y = size[1] / 2;
     frame.add(horizontal);
-    const crossbar = new THREE.Mesh(new THREE.BoxGeometry(.08, size[1], .12), this.materials.glassFrame);
+    const crossbar = new Mesh(new BoxGeometry(.08, size[1], .12), this.materials.glassFrame);
     frame.add(crossbar);
     frame.position.set(...position);
     frame.rotation.y = rotationY;
@@ -320,20 +320,20 @@ export class WorldBuilder {
     ];
 
     terminalSpots.forEach((data) => {
-      const terminal = new THREE.Group();
+      const terminal = new Group();
       terminal.name = 'Terminal_' + data.id;
-      const body = new THREE.Mesh(new THREE.BoxGeometry(.85, .72, .58), this.materials.panel);
+      const body = new Mesh(new BoxGeometry(.85, .72, .58), this.materials.panel);
       body.position.y = .36;
       body.castShadow = true;
       body.receiveShadow = true;
-      const cap = new THREE.Mesh(new THREE.BoxGeometry(.62, .08, .46), this.materials.trim);
+      const cap = new Mesh(new BoxGeometry(.62, .08, .46), this.materials.trim);
       cap.position.y = .76;
       cap.castShadow = true;
       const screenMaterial = this.materials.screen.clone();
-      const screen = new THREE.Mesh(new THREE.BoxGeometry(.45, .27, .04), screenMaterial);
+      const screen = new Mesh(new BoxGeometry(.45, .27, .04), screenMaterial);
       screen.position.set(0, .78, -.31);
       const ringMaterial = this.materials.cyanHot.clone();
-      const ring = new THREE.Mesh(new THREE.TorusGeometry(.44, .025, 5, 24), ringMaterial);
+      const ring = new Mesh(new TorusGeometry(.44, .025, 5, 24), ringMaterial);
       ring.rotation.x = -Math.PI / 2;
       ring.position.y = .04;
       terminal.add(body, cap, screen, ring);
@@ -341,7 +341,7 @@ export class WorldBuilder {
       this.root.add(terminal);
       const record = {
         ...data,
-        position: new THREE.Vector3(...data.position),
+        position: new Vector3(...data.position),
         object: terminal,
         screen,
         ring,
@@ -351,13 +351,13 @@ export class WorldBuilder {
       this.terminals.push(record);
     });
 
-    const extraction = new THREE.Group();
+    const extraction = new Group();
     extraction.name = 'ExtractionZone';
     const extractionMaterial = this.materials.cyanHot.clone();
-    const extractionRing = new THREE.Mesh(new THREE.TorusGeometry(2.45, .055, 8, 36), extractionMaterial);
+    const extractionRing = new Mesh(new TorusGeometry(2.45, .055, 8, 36), extractionMaterial);
     extractionRing.rotation.x = -Math.PI / 2;
     extractionRing.position.y = .045;
-    const extractionCore = new THREE.Mesh(new THREE.CylinderGeometry(.18, .18, .8, 8), this.materials.screen.clone());
+    const extractionCore = new Mesh(new CylinderGeometry(.18, .18, .8, 8), this.materials.screen.clone());
     extractionCore.position.y = .4;
     extraction.add(extractionRing, extractionCore);
     extraction.position.set(0, 0, 20.5);
@@ -391,21 +391,21 @@ export class WorldBuilder {
     this.root.add(cable2);
     for (const [x, z] of [[-4, -22], [10, -22], [21, -22], [-1, 26], [15, 26]]) {
       const lamp = this.addBox([x, 7.2, z], [1.4, .08, .25], this.materials.cyan, { collision: false, castShadow: false });
-      const point = new THREE.PointLight(0x7df3ca, 1.6, 8);
+      const point = new PointLight(0x7df3ca, 1.6, 8);
       point.position.set(x, 6.9, z); point.userData.baseIntensity = 1.6; point.userData.flicker = true; point.userData.priority = 2;
       this.scene.add(point); this.lights.push(point);
       lamp.material.emissiveIntensity = 2;
       this.glowMeshes.push(lamp);
     }
     for (const [x, z, color, label] of [[-35, -17, this.materials.cyanHot, '07'], [38, 13, this.materials.amberHot, 'R7'], [1, -25.8, this.materials.cyanHot, 'OPS']]) {
-      const sign = new THREE.Group();
-      const panel = new THREE.Mesh(new THREE.BoxGeometry(label === 'OPS' ? 2.5 : 1.35, .72, .08), this.materials.black);
-      const glow = new THREE.Mesh(new THREE.PlaneGeometry(label === 'OPS' ? 2.1 : .95, .32), color);
+      const sign = new Group();
+      const panel = new Mesh(new BoxGeometry(label === 'OPS' ? 2.5 : 1.35, .72, .08), this.materials.black);
+      const glow = new Mesh(new PlaneGeometry(label === 'OPS' ? 2.1 : .95, .32), color);
       glow.position.z = .051; sign.add(panel, glow); sign.position.set(x, 3.3, z); if (z < -25) sign.rotation.x = -.1; this.root.add(sign); this.glowMeshes.push(glow);
     }
-    const debrisGeometry = new THREE.DodecahedronGeometry(.12, 0);
+    const debrisGeometry = new DodecahedronGeometry(.12, 0);
     for (let i = 0; i < 32; i += 1) {
-      const debris = new THREE.Mesh(debrisGeometry, i % 2 ? this.materials.concreteDark : this.materials.metalDark);
+      const debris = new Mesh(debrisGeometry, i % 2 ? this.materials.concreteDark : this.materials.metalDark);
       debris.position.set(((i * 17) % 70) - 35, .12 + (i % 4) * .08, ((i * 23) % 42) - 20);
       debris.rotation.set(i * .4, i * .7, i * .2);
       debris.scale.setScalar(.5 + (i % 4) * .18);
