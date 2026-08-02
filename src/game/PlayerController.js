@@ -34,7 +34,7 @@ export class PlayerController {
     this.coyoteTimer = 0;
     this.stepTimer = .18;
     this.callbacks = options;
-    this.settings = { sensitivity: 1, mobileSensitivity: .62, invertY: false, fov: 76, ...options };
+    this.settings = { sensitivity: 1, mobileSensitivity: .62, invertY: false, fov: 76, initialPitch: 0, ...options };
     this.camera.rotation.order = 'YXZ';
     this.camera.near = .04;
     this.camera.far = 130;
@@ -141,7 +141,7 @@ export class PlayerController {
     this.damageCooldown = 0;
     this.grounded = false;
     this.yaw = 0;
-    this.pitch = 0;
+    this.pitch = this.settings.initialPitch;
     this.isCrouching = false;
     this.currentEyeHeight = this.eyeStand;
   }
@@ -165,6 +165,7 @@ export class PlayerController {
   }
 
   setInvertLook(value) { this.settings.invertY = value; }
+  setFov(value) { this.settings.fov = value; }
 
   getState() {
     return { health: this.health, dead: this.dead, grounded: this.grounded, crouching: this.isCrouching, sprinting: this.isSprinting, speed: this.velocity.length() };
