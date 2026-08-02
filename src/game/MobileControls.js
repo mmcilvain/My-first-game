@@ -18,6 +18,7 @@ export class MobileControls {
     this.bindAction('mobileJump', 'jump', false);
     this.bindAction('mobileReload', 'reload', false);
     this.bindAction('mobileCrouch', 'crouchToggle', false);
+    this.bindAction('mobileUse', 'interact', false);
   }
 
   bindJoystick() {
