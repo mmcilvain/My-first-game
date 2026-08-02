@@ -22,6 +22,10 @@ npm run preview
 
 The production output is written to `dist/` and is a static Vite build.
 
+## Phase 1 mission mode
+
+Operation Nightfall now turns Relay Yard 7 into a short mission: sync three relay terminals, survive the power failure, and reach extraction. Security units become active after the final relay comes online. The run can be completed, failed, and restarted.
+
 ## Desktop controls
 
 | Action | Control |
@@ -34,6 +38,7 @@ The production output is written to `dist/` and is a static Vite build.
 | Jump | Space |
 | Crouch | Ctrl or C |
 | Reload | R |
+| Interact | E |
 | Pause / resume | Escape |
 
 Click the game canvas after starting if the browser has released pointer lock. If pointer lock is rejected, the pause menu still provides touch/mouse-accessible settings and reset controls.
