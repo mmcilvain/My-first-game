@@ -109,9 +109,13 @@ class GameApp {
     this.settings = { preset: defaultPreset, ...presets[defaultPreset], sensitivity: 1, mobileSensitivity: .62, invertY: false, volume: .7, fps: false };
     this.loadSettings();
     this.settings.mobile = this.device.mobile;
+    if (this.device.mobile) {
+      this.settings.shadowQuality = 0;
+      this.settings.ao = false;
+    }
     this.scene = new Scene();
-    this.scene.background = new Color(this.device.mobile ? 0x122a2e : 0x0b1a21);
-    this.scene.fog = new FogExp2(this.device.mobile ? 0x254b4d : 0x193637, this.device.mobile ? .0082 : .0115);
+    this.scene.background = new Color(this.device.mobile ? 0x193538 : 0x0b1a21);
+    this.scene.fog = new FogExp2(this.device.mobile ? 0x35615e : 0x193637, this.device.mobile ? .0055 : .0115);
     this.camera = new PerspectiveCamera(76, 1, .04, 130);
     this.clock = new Clock();
     this.lastFrame = 0;
@@ -222,8 +226,8 @@ class GameApp {
     this.renderer = new WebGLRenderer({ canvas: this.dom.canvas, antialias: this.settings.antialias, powerPreference: 'high-performance' });
     this.renderer.outputColorSpace = SRGBColorSpace;
     this.renderer.toneMapping = ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = this.settings.mobile ? 1.34 : 1.15;
-    this.renderer.shadowMap.enabled = this.settings.shadowQuality > 0;
+    this.renderer.toneMappingExposure = this.settings.mobile ? 1.55 : 1.15;
+    this.renderer.shadowMap.enabled = !this.settings.mobile && this.settings.shadowQuality > 0;
     this.renderer.shadowMap.type = PCFSoftShadowMap;
     this.renderer.setClearColor(0x0b1a21, 1);
   }
@@ -339,7 +343,11 @@ class GameApp {
   }
 
   applySettings() {
-    this.renderer.shadowMap.enabled = this.settings.shadowQuality > 0;
+    if (this.settings.mobile) {
+      this.settings.shadowQuality = 0;
+      this.settings.ao = false;
+    }
+    this.renderer.shadowMap.enabled = !this.settings.mobile && this.settings.shadowQuality > 0;
     this.post.setSettings(this.settings);
     this.particles.setDensity(this.settings.particleDensity);
     this.world.setGraphics(this.settings);
