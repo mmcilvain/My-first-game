@@ -1,6 +1,6 @@
-import * as THREE from 'three';
+import { MathUtils, Vector2, Vector3 } from 'three';
 
-const WORLD_UP = new THREE.Vector3(0, 1, 0);
+const WORLD_UP = new Vector3(0, 1, 0);
 
 export class PlayerController {
   constructor(camera, physics, spawn, options = {}) {
@@ -8,12 +8,12 @@ export class PlayerController {
     this.physics = physics;
     this.spawn = spawn.clone();
     this.position = spawn.clone();
-    this.velocity = new THREE.Vector3();
-    this.desiredPosition = new THREE.Vector3();
-    this.moveDirection = new THREE.Vector3();
-    this.forward = new THREE.Vector3();
-    this.right = new THREE.Vector3();
-    this.lookVelocity = new THREE.Vector2();
+    this.velocity = new Vector3();
+    this.desiredPosition = new Vector3();
+    this.moveDirection = new Vector3();
+    this.forward = new Vector3();
+    this.right = new Vector3();
+    this.lookVelocity = new Vector2();
     this.yaw = 0;
     this.pitch = 0;
     this.time = 0;
@@ -54,7 +54,7 @@ export class PlayerController {
     const sensitivity = (input.isMobile ? this.settings.mobileSensitivity : 1) * this.settings.sensitivity;
     this.yaw -= input.lookX * .0024 * sensitivity;
     this.pitch -= input.lookY * .0024 * sensitivity * (this.settings.invertY ? -1 : 1);
-    this.pitch = THREE.MathUtils.clamp(this.pitch, -1.43, 1.43);
+    this.pitch = MathUtils.clamp(this.pitch, -1.43, 1.43);
     this.lookVelocity.set(input.lookX, input.lookY).multiplyScalar(.0024);
 
     const wantsCrouch = input.crouch;
@@ -65,7 +65,7 @@ export class PlayerController {
     }
     const targetHeight = this.isCrouching ? this.crouchHeight : this.standHeight;
     const heightBlend = 1 - Math.exp(-delta * 13);
-    this.currentEyeHeight = THREE.MathUtils.lerp(this.currentEyeHeight, this.isCrouching ? this.eyeCrouch : this.eyeStand, heightBlend);
+    this.currentEyeHeight = MathUtils.lerp(this.currentEyeHeight, this.isCrouching ? this.eyeCrouch : this.eyeStand, heightBlend);
 
     const movement = input.movement;
     this.forward.set(Math.sin(this.yaw), 0, -Math.cos(this.yaw));
@@ -78,11 +78,11 @@ export class PlayerController {
     const acceleration = this.grounded ? (this.isSprinting ? 31 : 24) : 11;
     const targetVelocityX = this.moveDirection.x * speed;
     const targetVelocityZ = this.moveDirection.z * speed;
-    this.velocity.x = THREE.MathUtils.damp(this.velocity.x, targetVelocityX, acceleration, delta);
-    this.velocity.z = THREE.MathUtils.damp(this.velocity.z, targetVelocityZ, acceleration, delta);
+    this.velocity.x = MathUtils.damp(this.velocity.x, targetVelocityX, acceleration, delta);
+    this.velocity.z = MathUtils.damp(this.velocity.z, targetVelocityZ, acceleration, delta);
     if (!moving && this.grounded) {
-      this.velocity.x = THREE.MathUtils.damp(this.velocity.x, 0, 35, delta);
-      this.velocity.z = THREE.MathUtils.damp(this.velocity.z, 0, 35, delta);
+      this.velocity.x = MathUtils.damp(this.velocity.x, 0, 35, delta);
+      this.velocity.z = MathUtils.damp(this.velocity.z, 0, 35, delta);
     }
     if (this.coyoteTimer > 0 && this.jumpBuffer > 0 && !this.isCrouching) {
       this.velocity.y = 7.15;
@@ -117,19 +117,19 @@ export class PlayerController {
     const bobX = Math.cos(this.time * bobRate) * bobAmount;
     const bobY = Math.abs(Math.sin(this.time * bobRate)) * bobAmount;
     this.camera.position.set(this.position.x + bobX, this.position.y + this.currentEyeHeight + bobY, this.position.z);
-    const sway = THREE.MathUtils.damp(this.camera.rotation.z, -this.velocity.x * .008, 10, delta);
+    const sway = MathUtils.damp(this.camera.rotation.z, -this.velocity.x * .008, 10, delta);
     this.camera.rotation.set(this.pitch, this.yaw, sway, 'YXZ');
     const targetFov = this.isSprinting ? this.settings.fov + 6 : this.settings.fov;
-    this.camera.fov = THREE.MathUtils.damp(this.camera.fov, targetFov, 8, delta);
+    this.camera.fov = MathUtils.damp(this.camera.fov, targetFov, 8, delta);
     this.camera.updateProjectionMatrix();
   }
 
-  getForward(target = new THREE.Vector3()) {
+  getForward(target = new Vector3()) {
     target.set(0, 0, -1).applyEuler(this.camera.rotation).normalize();
     return target;
   }
 
-  getEyePosition(target = new THREE.Vector3()) {
+  getEyePosition(target = new Vector3()) {
     return target.copy(this.camera.position);
   }
 
@@ -149,7 +149,7 @@ export class PlayerController {
   takeDamage(amount, source = 'unknown') {
     if (this.dead || this.damageCooldown > 0) return false;
     this.damageCooldown = 0.3;
-    this.health = THREE.MathUtils.clamp(this.health - amount, 0, 100);
+    this.health = MathUtils.clamp(this.health - amount, 0, 100);
     this.callbacks.onDamage?.(amount, source, this.health);
     if (this.health <= 0) {
       this.dead = true;
