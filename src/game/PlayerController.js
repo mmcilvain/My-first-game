@@ -28,6 +28,8 @@ export class PlayerController {
     this.currentEyeHeight = this.eyeStand;
     this.heightVelocity = 0;
     this.health = 100;
+    this.dead = false;
+    this.damageCooldown = 0;
     this.jumpBuffer = 0;
     this.coyoteTimer = 0;
     this.stepTimer = .18;
@@ -42,6 +44,11 @@ export class PlayerController {
 
   update(delta, input) {
     this.time += delta;
+    this.damageCooldown = Math.max(0, this.damageCooldown - delta);
+    if (this.dead) {
+      this.updateCamera(delta, false);
+      return;
+    }
     this.jumpBuffer = input.jumpPressed ? .14 : Math.max(0, this.jumpBuffer - delta);
     this.coyoteTimer = this.grounded ? .11 : Math.max(0, this.coyoteTimer - delta);
     const sensitivity = (input.isMobile ? this.settings.mobileSensitivity : 1) * this.settings.sensitivity;
@@ -129,11 +136,27 @@ export class PlayerController {
   reset() {
     this.position.copy(this.spawn);
     this.velocity.set(0, 0, 0);
+    this.health = 100;
+    this.dead = false;
+    this.damageCooldown = 0;
     this.grounded = false;
     this.yaw = 0;
     this.pitch = 0;
     this.isCrouching = false;
     this.currentEyeHeight = this.eyeStand;
+  }
+
+  takeDamage(amount, source = 'unknown') {
+    if (this.dead || this.damageCooldown > 0) return false;
+    this.damageCooldown = 0.3;
+    this.health = THREE.MathUtils.clamp(this.health - amount, 0, 100);
+    this.callbacks.onDamage?.(amount, source, this.health);
+    if (this.health <= 0) {
+      this.dead = true;
+      this.velocity.set(0, 0, 0);
+      this.callbacks.onDeath?.(source);
+    }
+    return true;
   }
 
   setSensitivity(value, mobile = false) {
@@ -144,6 +167,6 @@ export class PlayerController {
   setInvertLook(value) { this.settings.invertY = value; }
 
   getState() {
-    return { health: this.health, grounded: this.grounded, crouching: this.isCrouching, sprinting: this.isSprinting, speed: this.velocity.length() };
+    return { health: this.health, dead: this.dead, grounded: this.grounded, crouching: this.isCrouching, sprinting: this.isSprinting, speed: this.velocity.length() };
   }
 }

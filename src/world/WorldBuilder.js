@@ -13,11 +13,14 @@ export class WorldBuilder {
     this.dynamicObjects = [];
     this.targetMeshes = [];
     this.targets = [];
+    this.terminals = [];
+    this.extractionZone = null;
     this.lights = [];
     this.foliage = [];
     this.glowMeshes = [];
     this.hazeMeshes = [];
     this.time = 0;
+    this.blackout = false;
     this.spawn = new THREE.Vector3(0, .02, 18);
   }
 
@@ -28,6 +31,7 @@ export class WorldBuilder {
     this.addBoundary();
     this.addArchitecture();
     this.addCoverAndProps();
+    this.addMissionObjects();
     this.addAtmosphereDetails();
     return this;
   }
@@ -308,6 +312,64 @@ export class WorldBuilder {
     return object;
   }
 
+  addMissionObjects() {
+    const terminalSpots = [
+      { id: 'A', label: 'RELAY A', position: [-19, 0, 16] },
+      { id: 'B', label: 'RELAY B', position: [0, 0, -10] },
+      { id: 'C', label: 'RELAY C', position: [20, 0, 15] },
+    ];
+
+    terminalSpots.forEach((data) => {
+      const terminal = new THREE.Group();
+      terminal.name = 'Terminal_' + data.id;
+      const body = new THREE.Mesh(new THREE.BoxGeometry(.85, .72, .58), this.materials.panel);
+      body.position.y = .36;
+      body.castShadow = true;
+      body.receiveShadow = true;
+      const cap = new THREE.Mesh(new THREE.BoxGeometry(.62, .08, .46), this.materials.trim);
+      cap.position.y = .76;
+      cap.castShadow = true;
+      const screenMaterial = this.materials.screen.clone();
+      const screen = new THREE.Mesh(new THREE.BoxGeometry(.45, .27, .04), screenMaterial);
+      screen.position.set(0, .78, -.31);
+      const ringMaterial = this.materials.cyanHot.clone();
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(.44, .025, 5, 24), ringMaterial);
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.y = .04;
+      terminal.add(body, cap, screen, ring);
+      terminal.position.set(...data.position);
+      this.root.add(terminal);
+      const record = {
+        ...data,
+        position: new THREE.Vector3(...data.position),
+        object: terminal,
+        screen,
+        ring,
+        activated: false,
+      };
+      terminal.userData.missionTerminal = record;
+      this.terminals.push(record);
+    });
+
+    const extraction = new THREE.Group();
+    extraction.name = 'ExtractionZone';
+    const extractionMaterial = this.materials.cyanHot.clone();
+    const extractionRing = new THREE.Mesh(new THREE.TorusGeometry(2.45, .055, 8, 36), extractionMaterial);
+    extractionRing.rotation.x = -Math.PI / 2;
+    extractionRing.position.y = .045;
+    const extractionCore = new THREE.Mesh(new THREE.CylinderGeometry(.18, .18, .8, 8), this.materials.screen.clone());
+    extractionCore.position.y = .4;
+    extraction.add(extractionRing, extractionCore);
+    extraction.position.set(0, 0, 20.5);
+    this.root.add(extraction);
+    this.extractionZone = {
+      position: extraction.position.clone(),
+      radius: 2.8,
+      object: extraction,
+      ring: extractionRing,
+    };
+  }
+
   addAtmosphereDetails() {
     this.addBox([0, 8.15, -3], [38, .22, .28], this.materials.metalDark, { collision: false, castShadow: true, edge: true });
     this.addBox([0, 8.15, 7], [38, .18, .22], this.materials.trim, { collision: false, castShadow: false, receiveShadow: false });
@@ -351,6 +413,17 @@ export class WorldBuilder {
     }
   }
 
+  setBlackout(active) {
+    this.blackout = active;
+    if (this.scene.fog) {
+      this.scene.fog.color.set(active ? 0x0d1019 : 0x193637);
+      this.scene.fog.density = active ? .018 : .0115;
+    }
+    this.terminals.forEach((terminal) => {
+      if (!terminal.activated) terminal.ring.material.emissiveIntensity = active ? 1.1 : 2.6;
+    });
+  }
+
   setGraphics(settings) {
     this.settings = { ...this.settings, ...settings };
     this.lights.forEach((light, index) => { light.visible = index < (this.settings.dynamicLights ?? 4); });
@@ -362,7 +435,7 @@ export class WorldBuilder {
     for (let i = 0; i < this.lights.length; i += 1) {
       const light = this.lights[i];
       if (!light.visible) continue;
-      light.intensity = light.userData.baseIntensity * (light.userData.flicker ? .92 + Math.sin(this.time * 23 + i * 4.1) * .06 + Math.sin(this.time * 61 + i) * .025 : 1);
+      light.intensity = light.userData.baseIntensity * (this.blackout ? .26 : 1) * (light.userData.flicker ? .92 + Math.sin(this.time * 23 + i * 4.1) * .06 + Math.sin(this.time * 61 + i) * .025 : 1);
     }
     for (let i = 0; i < this.foliage.length; i += 1) {
       const leaf = this.foliage[i];

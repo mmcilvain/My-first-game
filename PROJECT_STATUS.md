@@ -67,7 +67,8 @@ The current build includes:
 - Dusk lighting, skyline silhouettes, emissive signage, localized lights, muzzle flashes, bloom, vignette, film grain, contrast grading, and contact shading
 - Procedural Vanta-9 tactical carbine viewmodel with receiver, barrel, magazine, grip, stock, sights, gloves, recoil, sway, ADS, muzzle flash, shell ejection, tracers, reloads, ammo, and dry-fire feedback
 - Moving targets, head/body hit zones, headshots, scoring, rounds, combos, hit markers, target resets, and field-clear feedback
-- Desktop controls: WASD, mouse look, pointer lock, left-click fire, right-click ADS, Shift sprint, Space jump, C/Ctrl crouch, R reload, Esc pause
+- Phase 1 Operation Nightfall mission: three relay terminals, extraction zone, hostile security-unit pressure, player damage/death, blackout state, mission success/failure/restart
+- Desktop controls: WASD, mouse look, pointer lock, left-click fire, right-click ADS, Shift sprint, Space jump, C/Ctrl crouch, R reload, E interact, Esc pause
 - Mobile controls: virtual joystick, drag look region, fire, ADS, jump, crouch, sprint, reload, fullscreen support, safe-area padding, and orientation messaging
 - Graphics presets: Low, Medium, High
 - Runtime settings for resolution scale, shadows, bloom, contact shading, particles, dynamic lights, anti-aliasing, foliage density, sensitivity, invert look, audio volume, mute, and FPS counter

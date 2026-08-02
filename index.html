@@ -10,6 +10,7 @@
   <body>
     <main id="app" aria-label="Blackout Protocol game">
       <canvas id="gameCanvas" aria-label="3D game view"></canvas>
+      <div id="damageFlash" class="damage-flash" aria-hidden="true"></div>
 
       <section id="loadingScreen" class="screen-panel loading-screen">
         <div class="loading-mark"><span class="mark-dot"></span><span>BP//01</span></div>
@@ -52,7 +53,7 @@
         <div class="hud-top hud-panel">
           <div class="mission-readout"><span class="hud-label">OPERATION</span><strong>NIGHTFALL</strong><span class="hud-sub">RELAY YARD 7 / SECTOR C</span></div>
           <div class="compass"><span id="compassDirection">N</span><div class="compass-line"><i></i><i></i><i></i><i></i><i></i></div><span id="compassDegrees">000°</span></div>
-          <div class="objective-readout"><span class="hud-label">FIELD STATUS</span><strong id="targetStatus">TARGETS ACTIVE</strong><span class="status-dot"></span><div class="score-line"><span>SCORE <b id="scoreValue">00000</b></span><span>ROUND <b id="roundValue">01</b></span><span>COMBO <b id="comboValue">—</b></span></div></div>
+          <div class="objective-readout"><span class="hud-label">FIELD STATUS</span><strong id="targetStatus">READY</strong><span class="mission-objective" id="missionObjective">SYNC RELAY TERMINALS</span><span class="mission-progress" id="missionProgress">0/3 ONLINE</span><span class="status-dot"></span><div class="score-line"><span>SCORE <b id="scoreValue">00000</b></span><span>ROUND <b id="roundValue">01</b></span><span>COMBO <b id="comboValue">—</b></span></div></div>
         </div>
         <div id="crosshair" class="crosshair" aria-hidden="true"><i></i><i></i><i></i><i></i><b></b><span id="hitMarker" class="hit-marker">×</span></div>
         <div id="interactionPrompt" class="interaction-prompt hidden">PRESS <b>E</b> TO INTERACT</div>
@@ -75,6 +76,16 @@
           <button id="mobileJump" class="control-button" type="button" aria-label="Jump">↑<span>JMP</span></button>
           <button id="mobileCrouch" class="control-button" type="button" aria-label="Crouch">⌄<span>CRO</span></button>
           <button id="mobileSprint" class="control-button" type="button" aria-label="Sprint">»<span>RUN</span></button>
+          <button id="mobileUse" class="control-button use-button" type="button" aria-label="Interact">E<span>USE</span></button>
+        </div>
+      </section>
+
+      <section id="missionResult" class="modal hidden" aria-label="Mission result">
+        <div class="modal-card result-card">
+          <span id="missionResultEyebrow" class="eyebrow accent">OPERATION NIGHTFALL</span>
+          <h2 id="missionResultTitle">EXTRACTION COMPLETE</h2>
+          <p id="missionResultCopy">Relay Yard 7 is back online.</p>
+          <button id="missionResultButton" class="primary-button" type="button">RUN AGAIN <span>↻</span></button>
         </div>
       </section>
 
