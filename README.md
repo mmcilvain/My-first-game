@@ -22,9 +22,11 @@ npm run preview
 
 The production output is written to `dist/` and is a static Vite build.
 
-## Phase 1 mission mode
+## Phase 2 mission mode and performance
 
-Operation Nightfall now turns Relay Yard 7 into a short mission: sync three relay terminals, survive the power failure, and reach extraction. Security units become active after the final relay comes online. The run can be completed, failed, and restarted.
+Operation Nightfall turns Relay Yard 7 into a short mission: sync three relay terminals, survive the power failure, and reach extraction. Security units become active after the final relay comes online. The run can be completed, failed, and restarted.
+
+Phase 2 adds live objective distance and blackout countdown feedback so the next action is always visible in the HUD. It also reduces per-frame allocation churn in the enemy system and splits the production bundle into smaller Vite chunks, including a dedicated Three.js vendor chunk.
 
 ## Desktop controls
 
@@ -99,7 +101,7 @@ When prompted, use the existing project or create a new one. The included `verce
 
 ## Graphics and performance
 
-The game detects coarse pointer input, approximate device memory, and logical CPU count. Mobile devices default to Low or Medium. The pause menu exposes Low, Medium, and High presets plus individual controls for resolution scale, shadows, bloom, contact shading, particle density, dynamic lights, foliage, anti-aliasing, look sensitivity, invert look, volume, and an FPS counter.
+The game detects coarse pointer input, approximate device memory, and logical CPU count. Production builds use Vite chunk splitting so the application shell, game systems, world systems, and Three.js vendor code are delivered as separate chunks. Mobile devices default to Low or Medium. The pause menu exposes Low, Medium, and High presets plus individual controls for resolution scale, shadows, bloom, contact shading, particle density, dynamic lights, foliage, anti-aliasing, look sensitivity, invert look, volume, and an FPS counter.
 
 The renderer caps device pixel ratio on mobile. Repeated crates use instanced rendering. Particles and bullet marks use fixed pools. Physics uses a bounded fixed-step accumulator and a small number of active dynamic bodies. The scene uses frustum culling, distance-limited lights, simple collision boxes, and a custom inexpensive post-processing pass. Anti-aliasing is selected when the renderer is created, so changing that setting displays a restart notice; the other graphics settings apply immediately.
 
@@ -132,6 +134,7 @@ index.html
 package.json
 vercel.json
 README.md
+vite.config.js
 src/
   main.js
   styles.css
@@ -159,3 +162,4 @@ src/
 - [ ] Test mobile joystick, drag look, fire, aim, jump, crouch, sprint, reload, and multiple touches
 - [ ] Rotate between portrait and landscape
 - [ ] Switch Low, Medium, and High presets and confirm the FPS counter/settings respond
+- [ ] Confirm production output is split into application, world, game, and Three.js vendor chunks
