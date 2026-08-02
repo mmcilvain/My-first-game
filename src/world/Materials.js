@@ -8,8 +8,8 @@ export function createMaterialLibrary(renderer) {
     return new MeshStandardMaterial({
       color: options.color ?? 0xffffff,
       // A dark color map multiplied by a dark tint collapses to near-black in linear lighting.
-      // Tinted materials keep the roughness and normal detail without double-tinting the albedo.
-      map: hasTint ? null : textures[textureName].map,
+      // Tinted materials use a neutral detail map instead of multiplying two dark albedos.
+      map: hasTint ? textures[textureName].detailMap : textures[textureName].map,
       roughnessMap: textures[textureName].roughnessMap,
       normalMap: textures[textureName].normalMap,
       normalScale: new Vector2(options.normalScale ?? .18, options.normalScale ?? .18),
@@ -22,13 +22,13 @@ export function createMaterialLibrary(renderer) {
   };
 
   const glass = new MeshPhysicalMaterial({
-    color: 0x87d6cc, map: textures.glass.map, normalMap: textures.glass.normalMap,
+    color: 0x87d6cc, map: textures.glass.detailMap, normalMap: textures.glass.normalMap,
     normalScale: new Vector2(.035, .035), roughness: .14, metalness: .08,
     transmission: .18, thickness: .08, transparent: true, opacity: .42,
     clearcoat: .65, clearcoatRoughness: .12, side: DoubleSide,
   });
   const wet = new MeshPhysicalMaterial({
-    color: 0x486d68, roughnessMap: textures.wet.roughnessMap, normalMap: textures.wet.normalMap,
+    color: 0x486d68, map: textures.wet.detailMap, roughnessMap: textures.wet.roughnessMap, normalMap: textures.wet.normalMap,
     normalScale: new Vector2(.24, .24), roughness: .16, metalness: .28,
     clearcoat: .72, clearcoatRoughness: .11,
   });
