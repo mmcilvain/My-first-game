@@ -180,9 +180,7 @@ class GameApp {
       this.particles = new ParticleSystem(this.scene, this.settings);
       this.post = new PostProcessing(this.renderer, this.settings);
       this.post.setSettings(this.settings);
-      this.enemySystem = new EnemySystem(this.world, this.physics, this.particles, this.sound, {
-        onAttack: ({ amount }) => this.showToast('CONTACT // -' + amount + ' VITALS'),
-      });
+      this.enemySystem = new EnemySystem(this.world, this.physics, this.particles, this.sound);
       this.mission = new MissionSystem(this.world, this.player, this.enemySystem, {
         onToast: (message) => this.showToast(message),
         onState: () => this.updateMissionHud(),
@@ -433,9 +431,9 @@ class GameApp {
   }
 
   onPlayerDamage(amount, source) {
-    this.damageFlashTimer = window.setTimeout(() => this.dom.damageFlash?.classList.remove('visible'), 180);
     window.clearTimeout(this.damageFlashTimer);
     this.dom.damageFlash?.classList.add('visible');
+    this.damageFlashTimer = window.setTimeout(() => this.dom.damageFlash?.classList.remove('visible'), 180);
     this.showToast('CONTACT // -' + amount + ' VITALS');
   }
 
@@ -491,6 +489,7 @@ class GameApp {
     $('#scoreValue').textContent = this.score.toString().padStart(5, '0');
     $('#comboValue').textContent = this.combo > 1 ? `x${this.combo}` : '—';
     $('#roundValue').textContent = this.round.toString().padStart(2, '0');
+    this.updateMissionHud();
     if (this.settings.fps) $('#fpsCounter').textContent = `${Math.round(this.fps ?? 60)} FPS`;
   }
 
