@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import { LinearFilter, Mesh, OrthographicCamera, PlaneGeometry, Scene, ShaderMaterial, Vector2, WebGLRenderTarget } from 'three';
 
 const vertexShader = `
   varying vec2 vUv;
@@ -55,14 +55,14 @@ export class PostProcessing {
   constructor(renderer, settings = {}) {
     this.renderer = renderer;
     this.settings = { bloom: true, ao: true, grain: true, ...settings };
-    this.target = new THREE.WebGLRenderTarget(1, 1, { depthBuffer: true, stencilBuffer: false, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter });
+    this.target = new WebGLRenderTarget(1, 1, { depthBuffer: true, stencilBuffer: false, minFilter: LinearFilter, magFilter: LinearFilter });
     this.target.texture.name = 'BlackoutSceneColor';
-    this.scene = new THREE.Scene();
-    this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-    this.material = new THREE.ShaderMaterial({
+    this.scene = new Scene();
+    this.camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    this.material = new ShaderMaterial({
       uniforms: {
         tDiffuse: { value: this.target.texture },
-        resolution: { value: new THREE.Vector2(1, 1) },
+        resolution: { value: new Vector2(1, 1) },
         time: { value: 0 },
         bloom: { value: 1 },
         vignette: { value: .22 },
@@ -75,7 +75,7 @@ export class PostProcessing {
       depthTest: false,
       depthWrite: false,
     });
-    const plane = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.material);
+    const plane = new Mesh(new PlaneGeometry(2, 2), this.material);
     this.scene.add(plane);
     this.setSize(1, 1);
   }
