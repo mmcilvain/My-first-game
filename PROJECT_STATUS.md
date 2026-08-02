@@ -70,6 +70,7 @@ The current build includes:
 - Moving targets, head/body hit zones, headshots, scoring, rounds, combos, hit markers, target resets, and field-clear feedback
 - Phase 1 Operation Nightfall mission: three relay terminals, extraction zone, hostile security-unit pressure, player damage/death, blackout state, mission success/failure/restart
 - Phase 2 performance/combat-readability pass: Three.js vendor chunk splitting, lower enemy allocation churn, live objective distance, and blackout countdown feedback
+- Mobile visibility fix: brighter exposure, ambient/spawn fill lighting, lighter normal fog, and reduced mobile vignette/contrast
 - Desktop controls: WASD, mouse look, pointer lock, left-click fire, right-click ADS, Shift sprint, Space jump, C/Ctrl crouch, R reload, E interact, Esc pause
 - Mobile controls: virtual joystick, drag look region, fire, ADS, jump, crouch, sprint, reload, fullscreen support, safe-area padding, and orientation messaging
 - Graphics presets: Low, Medium, High
