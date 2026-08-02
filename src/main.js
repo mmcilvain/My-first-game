@@ -428,6 +428,15 @@ class GameApp {
     $('#targetStatus').style.color = state.state === 'blackout' ? '#ffb24d' : state.state === 'failed' ? '#ff5c66' : state.state === 'complete' ? '#76e8c6' : '';
     $('#missionObjective').textContent = state.objective;
     $('#missionProgress').textContent = state.progress;
+    const distance = state.distance == null ? '' : `${state.distance.toFixed(1)}M`;
+    const detail = state.state === 'blackout'
+      ? `HOLD ${state.remaining.toFixed(1)}S`
+      : distance
+        ? `DIST ${distance}`
+        : state.state === 'complete'
+          ? 'EXTRACTED'
+          : '';
+    $('#missionDistance').textContent = detail;
   }
 
   onPlayerDamage(amount, source) {
