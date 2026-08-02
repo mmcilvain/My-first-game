@@ -123,12 +123,17 @@ function makeMaps(name, options) {
   if (textureCache.has(name)) return textureCache.get(name);
   const size = 128;
   const colorCanvas = makeCanvas(size);
+  const detailCanvas = makeCanvas(size);
   const roughCanvas = makeCanvas(size);
   const normalCanvas = makeCanvas(size);
   const colorContext = colorCanvas.getContext('2d');
+  const detailContext = detailCanvas.getContext('2d');
   const roughContext = roughCanvas.getContext('2d');
   const normalContext = normalCanvas.getContext('2d');
   paintPattern(colorContext, options.kind, size, options.base, options.seed);
+  detailContext.fillStyle = '#d9dedb';
+  detailContext.fillRect(0, 0, size, size);
+  applyPixelNoise(detailContext, size, options.seed + 2, .12);
   roughContext.fillStyle = `rgb(${Math.round(options.roughness * 255)}, ${Math.round(options.roughness * 255)}, ${Math.round(options.roughness * 255)})`;
   roughContext.fillRect(0, 0, size, size);
   applyPixelNoise(roughContext, size, options.seed + 4, .18);
@@ -138,6 +143,7 @@ function makeMaps(name, options) {
 
   const maps = {
     map: configureTexture(new CanvasTexture(colorCanvas), options.repeat, options.anisotropy, true),
+    detailMap: configureTexture(new CanvasTexture(detailCanvas), options.repeat, options.anisotropy, true),
     roughnessMap: configureTexture(new CanvasTexture(roughCanvas), options.repeat, options.anisotropy),
     normalMap: configureTexture(new CanvasTexture(normalCanvas), options.repeat, options.anisotropy),
   };
@@ -163,6 +169,7 @@ export function createProceduralTextures(renderer) {
   for (const [name, definition] of Object.entries(definitions)) {
     result[name] = makeMaps(name, { ...definition, anisotropy });
     result[name].map.anisotropy = Math.min(anisotropy, 8);
+    result[name].detailMap.anisotropy = Math.min(anisotropy, 8);
     result[name].roughnessMap.anisotropy = Math.min(anisotropy, 8);
     result[name].normalMap.anisotropy = Math.min(anisotropy, 8);
   }

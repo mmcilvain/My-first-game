@@ -175,6 +175,8 @@ class GameApp {
         sensitivity: this.settings.sensitivity,
         mobileSensitivity: this.settings.mobileSensitivity,
         invertY: this.settings.invertY,
+        fov: this.device.mobile && window.innerHeight > window.innerWidth ? 64 : 76,
+        initialPitch: this.device.mobile && window.innerHeight > window.innerWidth ? -.08 : 0,
         onStep: (kind) => this.sound.step(kind),
         onDamage: (amount, source) => this.onPlayerDamage(amount, source),
         onDeath: () => this.failMission(),
@@ -378,6 +380,7 @@ class GameApp {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, pixelCap) * this.settings.resolutionScale);
     this.renderer.setSize(width, height, false);
     this.camera.aspect = width / height;
+    this.player?.setFov(this.device.mobile && height > width ? 64 : 76);
     this.camera.updateProjectionMatrix();
     this.post?.setSize(width, height, this.settings.resolutionScale);
   }

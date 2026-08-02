@@ -135,12 +135,16 @@ export class WorldBuilder {
   addBackdrop() {
     const sky = new Mesh(new SphereGeometry(115, 20, 12), new ShaderMaterial({
       side: BackSide, depthWrite: false,
-      uniforms: { top: { value: new Color(0x07131c) }, horizon: { value: new Color(0x35584f) }, sun: { value: new Color(0xffbf7a) } },
+      uniforms: {
+        top: { value: new Color(this.mobileLighting ? 0x102b34 : 0x07131c) },
+        horizon: { value: new Color(this.mobileLighting ? 0x476e63 : 0x35584f) },
+        sun: { value: new Color(0xffbf7a) },
+      },
       vertexShader: 'varying vec3 vWorld; void main(){ vWorld=normalize((modelMatrix*vec4(position,1.0)).xyz); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }',
       fragmentShader: 'uniform vec3 top; uniform vec3 horizon; uniform vec3 sun; varying vec3 vWorld; void main(){ float h=smoothstep(-.28,.48,vWorld.y); vec3 c=mix(horizon,top,h); float glow=pow(max(0.0,dot(vWorld,normalize(vec3(-.55,.28,.55)))),18.0); gl_FragColor=vec4(c+sun*glow*.55,1.0); }',
     }));
     sky.position.y = 12; sky.frustumCulled = false; this.root.add(sky);
-    const skylineMaterial = new MeshStandardMaterial({ color: 0x102521, roughness: .9, metalness: .18 });
+    const skylineMaterial = new MeshStandardMaterial({ color: this.mobileLighting ? 0x24433b : 0x102521, roughness: .9, metalness: .18 });
     const windowMaterial = new MeshStandardMaterial({ color: 0x73d7bd, emissive: 0x1b6b59, emissiveIntensity: 1.6, roughness: .38 });
     for (let i = 0; i < 28; i += 1) {
       const angle = (i / 28) * Math.PI * 2;
@@ -154,7 +158,7 @@ export class WorldBuilder {
       }
     }
     const coneGeometry = new ConeGeometry(3.8, 17, 18, 1, true);
-    const hazeMaterial = new MeshBasicMaterial({ color: 0x80f2d0, transparent: true, opacity: .045, depthWrite: false, side: DoubleSide, blending: AdditiveBlending });
+    const hazeMaterial = new MeshBasicMaterial({ color: 0x80f2d0, transparent: true, opacity: this.mobileLighting ? .026 : .045, depthWrite: false, side: DoubleSide, blending: AdditiveBlending });
     [[-22, 7, -15], [22, 8, -7], [4, 8, -14]].forEach((position, index) => {
       const haze = new Mesh(coneGeometry, hazeMaterial); haze.position.set(...position); haze.rotation.x = Math.PI; haze.userData.phase = index * 2.4; this.root.add(haze); this.hazeMeshes.push(haze);
     });
